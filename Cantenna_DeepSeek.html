@@ -151,6 +151,11 @@
             font-size: 1rem;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
+        
+        /* Style for invalid inputs */
+        input:invalid:not(:placeholder-shown) {
+             border-color: var(--warning-color);
+        }
 
         input:focus {
             outline: none;
@@ -229,6 +234,13 @@
             border-radius: 8px;
             border-left: 4px solid var(--error-color);
             display: none;
+        }
+        
+        /* Different style for live warnings */
+        .error-message.warning {
+            color: var(--warning-color);
+            background-color: rgba(244, 162, 97, 0.1);
+            border-left-color: var(--warning-color);
         }
 
         .error-message.show {
@@ -672,11 +684,99 @@
         let isDarkMode = false;
         let hasError = false;
 
+        // --- NEW HELPER FUNCTIONS ---
+        /**
+         * Shows a message in the error box.
+         * @param {string} message The text to display.
+         * @param {boolean} [isWarning=false] True for a warning (yellow), false for an error (red).
+         */
+        function showMessage(message, isWarning = false) {
+            errorMessage.textContent = message;
+            if (isWarning) {
+                errorMessage.classList.add('warning');
+                errorMessage.classList.remove('error'); // Ensure it's not styled as error
+            } else {
+                errorMessage.classList.remove('warning');
+                errorMessage.classList.add('error'); // Ensure it's styled as error
+            }
+            errorMessage.classList.add('show');
+        }
+
+        /** Hides the error message box. */
+        function hideMessage() {
+            errorMessage.textContent = '';
+            errorMessage.classList.remove('show');
+            errorMessage.classList.remove('warning');
+            errorMessage.classList.remove('error');
+        }
+        
+        // --- NEW LIVE VALIDATION FUNCTION ---
+        /** Validates inputs as the user types, showing warnings for min/max. */
+        function validateInputsLive() {
+            // Get values
+            const diameter = parseFloat(diameterInput.value);
+            const radius = parseFloat(radiusInput.value);
+            const length = parseFloat(lengthInput.value);
+
+            // Get limits
+            const minDiameter = parseFloat(diameterInput.min);
+            const maxDiameter = parseFloat(diameterInput.max);
+            const minRadius = parseFloat(radiusInput.min);
+            const maxRadius = parseFloat(radiusInput.max);
+            const minLength = parseFloat(lengthInput.min);
+            const maxLength = parseFloat(lengthInput.max);
+
+            // Check for non-numeric, but ignore empty fields
+            if ((diameterInput.value && isNaN(diameter)) || 
+                (radiusInput.value && isNaN(radius)) || 
+                (lengthInput.value && isNaN(length))) {
+                showMessage('Please enter only valid numbers.', true);
+                return;
+            }
+
+            // Check min/max limits
+            if (diameter > 0 && diameter < minDiameter) {
+                showMessage(`Warning: Diameter is below the minimum of ${minDiameter} cm.`, true);
+                return;
+            }
+            if (diameter > maxDiameter) {
+                showMessage(`Warning: Diameter is above the maximum of ${maxDiameter} cm.`, true);
+                return;
+            }
+
+            if (radius > 0 && radius < minRadius) {
+                showMessage(`Warning: Radius is below the minimum of ${minRadius} cm.`, true);
+                return;
+            }
+            if (radius > maxRadius) {
+                showMessage(`Warning: Radius is above the maximum of ${maxRadius} cm.`, true);
+                return;
+            }
+
+            if (length > 0 && length < minLength) {
+                showMessage(`Warning: Length is below the minimum of ${minLength} cm.`, true);
+                return;
+            }
+            if (length > maxLength) {
+                showMessage(`Warning: Length is above the maximum of ${maxLength} cm.`, true);
+                return;
+            }
+
+            // If all live checks pass, hide the message
+            hideMessage();
+        }
+
         // Initialize
         function init() {
             // Set up event listeners
             diameterInput.addEventListener('input', handleDiameterChange);
             radiusInput.addEventListener('input', handleRadiusChange);
+            
+            // --- UPDATED: Add live validation listeners ---
+            diameterInput.addEventListener('input', validateInputsLive);
+            radiusInput.addEventListener('input', validateInputsLive);
+            lengthInput.addEventListener('input', validateInputsLive);
+
             calculateBtn.addEventListener('click', calculate);
             resetBtn.addEventListener('click', resetForm);
             darkModeToggle.addEventListener('click', toggleDarkMode);
@@ -711,15 +811,13 @@
 
             // Reset error state
             hasError = false;
-            errorMessage.textContent = '';
-            errorMessage.classList.remove('show');
+            hideMessage(); // Use the new helper function
             calculationSteps.style.display = 'none';
 
             // Check if inputs are valid numbers
             if (isNaN(diameter) || isNaN(radius) || isNaN(length) || 
                 diameter <= 0 || radius <= 0 || length <= 0) {
-                errorMessage.textContent = 'Error: Please enter valid positive numbers for all dimensions.';
-                errorMessage.classList.add('show');
+                showMessage('Error: Please enter valid positive numbers for all dimensions.'); // Use helper
                 hasError = true;
                 clearResults();
                 clearSimulation();
@@ -728,8 +826,7 @@
 
             // Check diameter and radius consistency (using a small epsilon for float comparison)
             if (Math.abs(diameter - 2 * radius) > 0.0001) {
-                errorMessage.textContent = 'Error: Diameter and radius do not match — diameter must always equal 2 × radius.';
-                errorMessage.classList.add('show');
+                showMessage('Error: Diameter and radius do not match — diameter must always equal 2 × radius.'); // Use helper
                 hasError = true;
                 clearResults();
                 clearSimulation();
@@ -744,10 +841,9 @@
             const wireOffset = guideWavelength / 4;
             const wireToRim = length - wireOffset;
 
-            // Check design rules
+            // Check design rules (These are *final errors*, not warnings)
             if (cutoffFreq >= F) {
-                errorMessage.textContent = 'Error: Can diameter too small — cutoff frequency is higher than 2.4 GHz. Increase the diameter.';
-                errorMessage.classList.add('show');
+                showMessage(`Error: Can diameter is too small. Cutoff frequency (${(cutoffFreq / 1e9).toFixed(3)} GHz) is above 2.4 GHz. Increase diameter.`); // Use helper
                 hasError = true;
                 clearResults();
                 clearSimulation();
@@ -755,8 +851,8 @@
             }
 
             if (wireToRim < 0) {
-                errorMessage.textContent = 'Error: Can length too short — copper wire would extend beyond the can. Increase the length.';
-                errorMessage.classList.add('show');
+                const minLen = wireOffset * 100;
+                showMessage(`Error: Can length is too short. It must be at least ${minLen.toFixed(2)} cm for this diameter. Please increase the length.`); // Use helper
                 hasError = true;
                 clearResults();
                 clearSimulation();
@@ -964,7 +1060,7 @@
             
             // Draw arrowheads
             drawArrowhead(ctx, x1, y1, x2, y2);
-            drawArrowhead(ctx, x2, y2, x1, yi);
+            drawArrowhead(ctx, x2, y2, x1, y1);
             
             // Reset line dash
             ctx.setLineDash([]);
@@ -1000,8 +1096,7 @@
             diameterInput.value = '0';
             radiusInput.value = '0';
             lengthInput.value = '0';
-            errorMessage.textContent = '';
-            errorMessage.classList.remove('show');
+            hideMessage(); // Use helper
             hasError = false;
             clearResults();
             clearSimulation();
