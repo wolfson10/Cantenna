@@ -68,12 +68,6 @@
             opacity: 0.8;
         }
 
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -220,6 +214,57 @@
             border-radius: 2px;
         }
 
+        .calculation-steps {
+            margin-top: 30px;
+        }
+
+        .calculation-step {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .step-formula {
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 5px 0;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+        }
+
+        .step-explanation {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .step-substitution {
+            font-family: monospace;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--success-color);
+        }
+
+        .step-result {
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
+        }
+
         .formulas {
             margin-top: 30px;
         }
@@ -270,11 +315,6 @@
         }
 
         @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
             .button-group {
                 flex-direction: column;
             }
@@ -345,17 +385,24 @@
                     <div class="result-value" id="guideWavelength">0 cm</div>
                 </div>
                 <div class="result-item">
-                    <div class="result-label">Probe Length (Lp)</div>
-                    <div class="result-value" id="probeLength">0 cm</div>
+                    <div class="result-label">Copper Wire Length (Lw)</div>
+                    <div class="result-value" id="wireLength">0 cm</div>
                 </div>
                 <div class="result-item">
-                    <div class="result-label">Probe Offset (Dback)</div>
-                    <div class="result-value" id="probeOffset">0 cm</div>
+                    <div class="result-label">Wire Offset from Back (Dback)</div>
+                    <div class="result-value" id="wireOffset">0 cm</div>
                 </div>
                 <div class="result-item">
-                    <div class="result-label">Probe to Rim (Drim)</div>
-                    <div class="result-value" id="probeToRim">0 cm</div>
+                    <div class="result-label">Wire to Rim (Drim)</div>
+                    <div class="result-value" id="wireToRim">0 cm</div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card calculation-steps" id="calculationSteps" style="display: none;">
+            <h2>Calculation Steps</h2>
+            <div id="stepsContainer">
+                <!-- Calculation steps will be inserted here -->
             </div>
         </div>
 
@@ -370,7 +417,7 @@
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #FFD700;"></div>
-                        <span>Copper Probe</span>
+                        <span>Copper Wire</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background-color: #C0C0C0;"></div>
@@ -399,16 +446,16 @@
                 <div class="explanation">Guide wavelength inside the can</div>
             </div>
             <div class="formula-item">
-                <div class="formula">Lp = λ / 4</div>
-                <div class="explanation">Optimal probe length is quarter wavelength</div>
+                <div class="formula">Lw = λ / 4</div>
+                <div class="explanation">Optimal copper wire length is quarter wavelength</div>
             </div>
             <div class="formula-item">
                 <div class="formula">Dback = λg / 4</div>
-                <div class="explanation">Probe offset from the back of the can</div>
+                <div class="explanation">Copper wire offset from the back of the can</div>
             </div>
             <div class="formula-item">
                 <div class="formula">Drim = L − Dback</div>
-                <div class="explanation">Distance from probe to the open rim</div>
+                <div class="explanation">Distance from copper wire to the open rim</div>
             </div>
         </div>
     </div>
@@ -429,14 +476,16 @@
         const darkModeIcon = document.getElementById('darkModeIcon');
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
+        const calculationSteps = document.getElementById('calculationSteps');
+        const stepsContainer = document.getElementById('stepsContainer');
 
         // Result elements
         const wavelengthEl = document.getElementById('wavelength');
         const cutoffFreqEl = document.getElementById('cutoffFreq');
         const guideWavelengthEl = document.getElementById('guideWavelength');
-        const probeLengthEl = document.getElementById('probeLength');
-        const probeOffsetEl = document.getElementById('probeOffset');
-        const probeToRimEl = document.getElementById('probeToRim');
+        const wireLengthEl = document.getElementById('wireLength');
+        const wireOffsetEl = document.getElementById('wireOffset');
+        const wireToRimEl = document.getElementById('wireToRim');
 
         // State variables
         let isDarkMode = false;
@@ -480,6 +529,7 @@
             // Reset error state
             hasError = false;
             errorMessage.textContent = '';
+            calculationSteps.style.display = 'none';
 
             // Check if inputs are valid numbers
             if (isNaN(diameter) || isNaN(radius) || isNaN(length) || 
@@ -504,9 +554,9 @@
             const wavelength = C / F;
             const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
             const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
-            const probeLength = wavelength / 4;
-            const probeOffset = guideWavelength / 4;
-            const probeToRim = length - probeOffset;
+            const wireLength = wavelength / 4;
+            const wireOffset = guideWavelength / 4;
+            const wireToRim = length - wireOffset;
 
             // Check design rules
             if (cutoffFreq >= F) {
@@ -517,8 +567,8 @@
                 return;
             }
 
-            if (probeToRim < 0) {
-                errorMessage.textContent = 'Error: Can length too short — probe would extend beyond the can. Increase the length.';
+            if (wireToRim < 0) {
+                errorMessage.textContent = 'Error: Can length too short — copper wire would extend beyond the can. Increase the length.';
                 hasError = true;
                 clearResults();
                 clearSimulation();
@@ -527,19 +577,20 @@
 
             // Update results if no errors
             if (!hasError) {
-                updateResults(wavelength, cutoffFreq, guideWavelength, probeLength, probeOffset, probeToRim);
-                updateSimulation(diameter, length, probeOffset);
+                updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
+                updateSimulation(diameter, length, wireOffset);
+                showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
             }
         }
 
         // Update result display
-        function updateResults(wavelength, cutoffFreq, guideWavelength, probeLength, probeOffset, probeToRim) {
+        function updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {
             wavelengthEl.textContent = (wavelength * 100).toFixed(2) + ' cm';
             cutoffFreqEl.textContent = (cutoffFreq / 1e9).toFixed(3) + ' GHz';
             guideWavelengthEl.textContent = (guideWavelength * 100).toFixed(2) + ' cm';
-            probeLengthEl.textContent = (probeLength * 100).toFixed(2) + ' cm';
-            probeOffsetEl.textContent = (probeOffset * 100).toFixed(2) + ' cm';
-            probeToRimEl.textContent = (probeToRim * 100).toFixed(2) + ' cm';
+            wireLengthEl.textContent = (wireLength * 100).toFixed(2) + ' cm';
+            wireOffsetEl.textContent = (wireOffset * 100).toFixed(2) + ' cm';
+            wireToRimEl.textContent = (wireToRim * 100).toFixed(2) + ' cm';
         }
 
         // Clear results
@@ -547,13 +598,102 @@
             wavelengthEl.textContent = '0 cm';
             cutoffFreqEl.textContent = '0 GHz';
             guideWavelengthEl.textContent = '0 cm';
-            probeLengthEl.textContent = '0 cm';
-            probeOffsetEl.textContent = '0 cm';
-            probeToRimEl.textContent = '0 cm';
+            wireLengthEl.textContent = '0 cm';
+            wireOffsetEl.textContent = '0 cm';
+            wireToRimEl.textContent = '0 cm';
+        }
+
+        // Show calculation steps
+        function showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {
+            stepsContainer.innerHTML = '';
+            
+            // Step 1: Wavelength calculation
+            const step1 = document.createElement('div');
+            step1.className = 'calculation-step';
+            step1.innerHTML = `
+                <div class="step-title">1. Calculate Wavelength (λ)</div>
+                <div class="step-formula">λ = c / f</div>
+                <div class="step-explanation">Where c = speed of light (3×10⁸ m/s), f = frequency (2.4 GHz)</div>
+                <div class="step-substitution">λ = 3×10⁸ m/s / 2.4×10⁹ Hz</div>
+                <div class="step-substitution">λ = ${wavelength.toFixed(4)} m</div>
+                <div class="step-result">Wavelength: ${(wavelength * 100).toFixed(2)} cm</div>
+            `;
+            stepsContainer.appendChild(step1);
+            
+            // Step 2: Cutoff frequency calculation
+            const step2 = document.createElement('div');
+            step2.className = 'calculation-step';
+            step2.innerHTML = `
+                <div class="step-title">2. Calculate Cutoff Frequency (fc)</div>
+                <div class="step-formula">fc = (1.8412 × c) / (π × D)</div>
+                <div class="step-explanation">Where D = diameter of can (${(diameter * 100).toFixed(1)} cm)</div>
+                <div class="step-substitution">fc = (1.8412 × 3×10⁸ m/s) / (π × ${diameter.toFixed(4)} m)</div>
+                <div class="step-substitution">fc = ${(1.8412 * C).toExponential(2)} / ${(Math.PI * diameter).toFixed(4)}</div>
+                <div class="step-substitution">fc = ${cutoffFreq.toExponential(2)} Hz</div>
+                <div class="step-result">Cutoff Frequency: ${(cutoffFreq / 1e9).toFixed(3)} GHz</div>
+            `;
+            stepsContainer.appendChild(step2);
+            
+            // Step 3: Guide wavelength calculation
+            const step3 = document.createElement('div');
+            step3.className = 'calculation-step';
+            step3.innerHTML = `
+                <div class="step-title">3. Calculate Guide Wavelength (λg)</div>
+                <div class="step-formula">λg = λ / √(1 − (fc / f)²)</div>
+                <div class="step-explanation">Where fc = ${(cutoffFreq / 1e9).toFixed(3)} GHz, f = 2.4 GHz</div>
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − (${(cutoffFreq / F).toFixed(4)})²)</div>
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − ${Math.pow(cutoffFreq / F, 2).toFixed(4)})</div>
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(${(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)})</div>
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / ${Math.sqrt(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)}</div>
+                <div class="step-substitution">λg = ${guideWavelength.toFixed(4)} m</div>
+                <div class="step-result">Guide Wavelength: ${(guideWavelength * 100).toFixed(2)} cm</div>
+            `;
+            stepsContainer.appendChild(step3);
+            
+            // Step 4: Copper wire length calculation
+            const step4 = document.createElement('div');
+            step4.className = 'calculation-step';
+            step4.innerHTML = `
+                <div class="step-title">4. Calculate Copper Wire Length (Lw)</div>
+                <div class="step-formula">Lw = λ / 4</div>
+                <div class="step-explanation">Optimal copper wire length is quarter wavelength</div>
+                <div class="step-substitution">Lw = ${wavelength.toFixed(4)} / 4</div>
+                <div class="step-substitution">Lw = ${wireLength.toFixed(4)} m</div>
+                <div class="step-result">Copper Wire Length: ${(wireLength * 100).toFixed(2)} cm</div>
+            `;
+            stepsContainer.appendChild(step4);
+            
+            // Step 5: Wire offset calculation
+            const step5 = document.createElement('div');
+            step5.className = 'calculation-step';
+            step5.innerHTML = `
+                <div class="step-title">5. Calculate Wire Offset from Back (Dback)</div>
+                <div class="step-formula">Dback = λg / 4</div>
+                <div class="step-explanation">Copper wire offset from the back of the can</div>
+                <div class="step-substitution">Dback = ${guideWavelength.toFixed(4)} / 4</div>
+                <div class="step-substitution">Dback = ${wireOffset.toFixed(4)} m</div>
+                <div class="step-result">Wire Offset from Back: ${(wireOffset * 100).toFixed(2)} cm</div>
+            `;
+            stepsContainer.appendChild(step5);
+            
+            // Step 6: Wire to rim distance calculation
+            const step6 = document.createElement('div');
+            step6.className = 'calculation-step';
+            step6.innerHTML = `
+                <div class="step-title">6. Calculate Wire to Rim Distance (Drim)</div>
+                <div class="step-formula">Drim = L − Dback</div>
+                <div class="step-explanation">Where L = can length (${(length * 100).toFixed(1)} cm)</div>
+                <div class="step-substitution">Drim = ${length.toFixed(4)} - ${wireOffset.toFixed(4)}</div>
+                <div class="step-substitution">Drim = ${wireToRim.toFixed(4)} m</div>
+                <div class="step-result">Wire to Rim Distance: ${(wireToRim * 100).toFixed(2)} cm</div>
+            `;
+            stepsContainer.appendChild(step6);
+            
+            calculationSteps.style.display = 'block';
         }
 
         // Update simulation
-        function updateSimulation(diameter, length, probeOffset) {
+        function updateSimulation(diameter, length, wireOffset) {
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -575,11 +715,10 @@
             ctx.fillStyle = '#C0C0C0'; // Silver for connector
             ctx.fillRect(canX - connectorSize/2, canY - connectorSize/2, connectorSize, connectorSize);
             
-            // Draw probe
-            const probeX = canX + (probeOffset * scaleX);
-            const probeLengthPx = (C / F / 4) * scaleX; // Quarter wavelength
-            ctx.fillStyle = '#FFD700'; // Gold for copper probe
-            ctx.fillRect(probeX, canY - canHeight/2, 5, canHeight);
+            // Draw copper wire
+            const wireX = canX + (wireOffset * scaleX);
+            ctx.fillStyle = '#FFD700'; // Gold for copper wire
+            ctx.fillRect(wireX, canY - canHeight/2, 5, canHeight);
             
             // Draw cable
             ctx.strokeStyle = '#0000FF'; // Blue for cable
@@ -594,13 +733,13 @@
             ctx.font = '14px Arial';
             ctx.fillText('Can Body', canX + canWidth/2 - 30, canY - canHeight/2 - 10);
             ctx.fillText('N-Type Connector', canX - 60, canY - canHeight/2 - 10);
-            ctx.fillText('Copper Probe', probeX - 30, canY - canHeight/2 - 30);
+            ctx.fillText('Copper Wire', wireX - 30, canY - canHeight/2 - 30);
             ctx.fillText('LMR400 Cable', 10, canY - 20);
             
             // Draw dimensions
             drawDimension(ctx, canX, canY - canHeight/2 - 20, canX + canWidth, canY - canHeight/2 - 20, `Length: ${(length * 100).toFixed(1)} cm`);
             drawDimension(ctx, canX + canWidth + 10, canY - canHeight/2, canX + canWidth + 10, canY + canHeight/2, `Diameter: ${(diameter * 100).toFixed(1)} cm`);
-            drawDimension(ctx, canX, canY + canHeight/2 + 10, probeX, canY + canHeight/2 + 10, `Probe Offset: ${(probeOffset * 100).toFixed(1)} cm`);
+            drawDimension(ctx, canX, canY + canHeight/2 + 10, wireX, canY + canHeight/2 + 10, `Wire Offset: ${(wireOffset * 100).toFixed(1)} cm`);
         }
 
         // Helper function to draw dimension lines with text
@@ -657,6 +796,7 @@
             hasError = false;
             clearResults();
             clearSimulation();
+            calculationSteps.style.display = 'none';
         }
 
         // Toggle dark mode
@@ -672,9 +812,9 @@
                 const wavelength = C / F;
                 const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
                 const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
-                const probeOffset = guideWavelength / 4;
+                const wireOffset = guideWavelength / 4;
                 
-                updateSimulation(diameter, length, probeOffset);
+                updateSimulation(diameter, length, wireOffset);
             }
         }
 
