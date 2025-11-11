@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.4 GHz Wi-Fi Cantenna Designer</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --primary-color: #2196F3;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --input-bg: #fff;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --primary-color: #64b5f6;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --input-bg: #2d2d2d;
+            --shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        input:read-only {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .dimension-range {
+            font-size: 0.85rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .primary-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .secondary-btn {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            margin-top: 5px;
+            font-size: 0.9rem;
+            padding: 10px;
+            background-color: rgba(244, 67, 54, 0.1);
+            border-radius: 4px;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .simulation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        #simulationCanvas {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--card-bg);
+            margin-bottom: 15px;
+        }
+
+        .simulation-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 2px;
+        }
+
+        .formulas {
+            margin-top: 30px;
+        }
+
+        .formula-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+
+        .formula-item:hover {
+            transform: translateX(5px);
+        }
+
+        .formula {
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+
+        .explanation {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: rotate(30deg);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .results {
+                grid-template-columns: 1fr;
+            }
+            
+            #simulationCanvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2.4 GHz Wi-Fi Cantenna Designer</h1>
+            <p class="subtitle">Design and simulate a cantenna for 2.4 GHz Wi-Fi applications</p>
+        </header>
+
+        <div class="dark-mode-toggle" id="darkModeToggle">
+            <span id="darkModeIcon">🌙</span>
+        </div>
+
+        <div class="card">
+            <h2>Can Geometry</h2>
+            <div class="input-group">
+                <label for="diameter">Diameter (D)</label>
+                <input type="number" id="diameter" min="0" step="0.1" value="0">
+                <div class="dimension-range">Range: 7.3cm - 20cm (for proper operation)</div>
+            </div>
+
+            <div class="input-group">
+                <label for="radius">Radius (r)</label>
+                <input type="number" id="radius" min="0" step="0.1" value="0">
+                <div class="dimension-range">Range: 3.65cm - 10cm (for proper operation)</div>
+            </div>
+
+            <div class="input-group">
+                <label for="length">Length (L)</label>
+                <input type="number" id="length" min="0" step="0.1" value="0">
+                <div class="dimension-range">Range: 5cm - 50cm (minimum depends on diameter)</div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="button-group">
+                <button id="calculateBtn" class="primary-btn">Calculate</button>
+                <button id="resetBtn" class="secondary-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Calculated Parameters</h2>
+            <div class="results">
+                <div class="result-item">
+                    <div class="result-label">Wavelength (λ)</div>
+                    <div class="result-value" id="wavelength">0 cm</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Cutoff Frequency (fc)</div>
+                    <div class="result-value" id="cutoffFreq">0 GHz</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Guide Wavelength (λg)</div>
+                    <div class="result-value" id="guideWavelength">0 cm</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Probe Length (Lp)</div>
+                    <div class="result-value" id="probeLength">0 cm</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Probe Offset (Dback)</div>
+                    <div class="result-value" id="probeOffset">0 cm</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Probe to Rim (Drim)</div>
+                    <div class="result-value" id="probeToRim">0 cm</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Visual Simulation</h2>
+            <div class="simulation-container">
+                <canvas id="simulationCanvas" width="800" height="400"></canvas>
+                <div class="simulation-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #8B4513;"></div>
+                        <span>Can Body</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #FFD700;"></div>
+                        <span>Copper Probe</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #C0C0C0;"></div>
+                        <span>N-Type Connector</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #0000FF;"></div>
+                        <span>LMR400 Cable</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card formulas">
+            <h2>Formulas</h2>
+            <div class="formula-item">
+                <div class="formula">λ = c / f</div>
+                <div class="explanation">Wavelength equals speed of light divided by frequency</div>
+            </div>
+            <div class="formula-item">
+                <div class="formula">fc = (1.8412 × c) / (π × D)</div>
+                <div class="explanation">Cutoff frequency for the circular waveguide</div>
+            </div>
+            <div class="formula-item">
+                <div class="formula">λg = λ / √(1 − (fc / f)²)</div>
+                <div class="explanation">Guide wavelength inside the can</div>
+            </div>
+            <div class="formula-item">
+                <div class="formula">Lp = λ / 4</div>
+                <div class="explanation">Optimal probe length is quarter wavelength</div>
+            </div>
+            <div class="formula-item">
+                <div class="formula">Dback = λg / 4</div>
+                <div class="explanation">Probe offset from the back of the can</div>
+            </div>
+            <div class="formula-item">
+                <div class="formula">Drim = L − Dback</div>
+                <div class="explanation">Distance from probe to the open rim</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const C = 3e8; // Speed of light in m/s
+        const F = 2.4e9; // Fixed frequency in Hz
+
+        // DOM elements
+        const diameterInput = document.getElementById('diameter');
+        const radiusInput = document.getElementById('radius');
+        const lengthInput = document.getElementById('length');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Result elements
+        const wavelengthEl = document.getElementById('wavelength');
+        const cutoffFreqEl = document.getElementById('cutoffFreq');
+        const guideWavelengthEl = document.getElementById('guideWavelength');
+        const probeLengthEl = document.getElementById('probeLength');
+        const probeOffsetEl = document.getElementById('probeOffset');
+        const probeToRimEl = document.getElementById('probeToRim');
+
+        // State variables
+        let isDarkMode = false;
+        let hasError = false;
+
+        // Initialize
+        function init() {
+            // Set up event listeners
+            diameterInput.addEventListener('input', handleDiameterChange);
+            radiusInput.addEventListener('input', handleRadiusChange);
+            calculateBtn.addEventListener('click', calculate);
+            resetBtn.addEventListener('click', resetForm);
+            darkModeToggle.addEventListener('click', toggleDarkMode);
+
+            // Set initial values
+            resetForm();
+        }
+
+        // Handle diameter input change
+        function handleDiameterChange() {
+            const diameter = parseFloat(diameterInput.value);
+            if (!isNaN(diameter)) {
+                radiusInput.value = (diameter / 2).toFixed(1); // Update radius
+            }
+        }
+
+        // Handle radius input change
+        function handleRadiusChange() {
+            const radius = parseFloat(radiusInput.value);
+            if (!isNaN(radius)) {
+                diameterInput.value = (radius * 2).toFixed(1); // Update diameter
+            }
+        }
+
+        // Perform calculations
+        function calculate() {
+            const diameter = parseFloat(diameterInput.value) / 100; // Convert to meters
+            const radius = parseFloat(radiusInput.value) / 100; // Convert to meters
+            const length = parseFloat(lengthInput.value) / 100; // Convert to meters
+
+            // Reset error state
+            hasError = false;
+            errorMessage.textContent = '';
+
+            // Check if inputs are valid numbers
+            if (isNaN(diameter) || isNaN(radius) || isNaN(length) || 
+                diameter <= 0 || radius <= 0 || length <= 0) {
+                errorMessage.textContent = 'Error: Please enter valid positive numbers for all dimensions.';
+                hasError = true;
+                clearResults();
+                clearSimulation();
+                return;
+            }
+
+            // Check diameter and radius consistency
+            if (Math.abs(diameter - 2 * radius) > 0.001) {
+                errorMessage.textContent = 'Error: Diameter and radius do not match — diameter must always equal 2 × radius.';
+                hasError = true;
+                clearResults();
+                clearSimulation();
+                return;
+            }
+
+            // Calculate parameters
+            const wavelength = C / F;
+            const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
+            const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
+            const probeLength = wavelength / 4;
+            const probeOffset = guideWavelength / 4;
+            const probeToRim = length - probeOffset;
+
+            // Check design rules
+            if (cutoffFreq >= F) {
+                errorMessage.textContent = 'Error: Can diameter too small — cutoff frequency is higher than 2.4 GHz. Increase the diameter.';
+                hasError = true;
+                clearResults();
+                clearSimulation();
+                return;
+            }
+
+            if (probeToRim < 0) {
+                errorMessage.textContent = 'Error: Can length too short — probe would extend beyond the can. Increase the length.';
+                hasError = true;
+                clearResults();
+                clearSimulation();
+                return;
+            }
+
+            // Update results if no errors
+            if (!hasError) {
+                updateResults(wavelength, cutoffFreq, guideWavelength, probeLength, probeOffset, probeToRim);
+                updateSimulation(diameter, length, probeOffset);
+            }
+        }
+
+        // Update result display
+        function updateResults(wavelength, cutoffFreq, guideWavelength, probeLength, probeOffset, probeToRim) {
+            wavelengthEl.textContent = (wavelength * 100).toFixed(2) + ' cm';
+            cutoffFreqEl.textContent = (cutoffFreq / 1e9).toFixed(3) + ' GHz';
+            guideWavelengthEl.textContent = (guideWavelength * 100).toFixed(2) + ' cm';
+            probeLengthEl.textContent = (probeLength * 100).toFixed(2) + ' cm';
+            probeOffsetEl.textContent = (probeOffset * 100).toFixed(2) + ' cm';
+            probeToRimEl.textContent = (probeToRim * 100).toFixed(2) + ' cm';
+        }
+
+        // Clear results
+        function clearResults() {
+            wavelengthEl.textContent = '0 cm';
+            cutoffFreqEl.textContent = '0 GHz';
+            guideWavelengthEl.textContent = '0 cm';
+            probeLengthEl.textContent = '0 cm';
+            probeOffsetEl.textContent = '0 cm';
+            probeToRimEl.textContent = '0 cm';
+        }
+
+        // Update simulation
+        function updateSimulation(diameter, length, probeOffset) {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Scale factors for visualization
+            const scaleX = canvas.width / (length * 1.2); // Add some padding
+            const scaleY = canvas.height / (diameter * 3); // Make it visually appealing
+            
+            // Draw can body
+            const canX = 50;
+            const canY = canvas.height / 2;
+            const canWidth = length * scaleX;
+            const canHeight = diameter * scaleY;
+            
+            ctx.fillStyle = '#8B4513'; // Brown for can
+            ctx.fillRect(canX, canY - canHeight/2, canWidth, canHeight);
+            
+            // Draw connector at the back
+            const connectorSize = Math.min(canHeight * 0.3, 30);
+            ctx.fillStyle = '#C0C0C0'; // Silver for connector
+            ctx.fillRect(canX - connectorSize/2, canY - connectorSize/2, connectorSize, connectorSize);
+            
+            // Draw probe
+            const probeX = canX + (probeOffset * scaleX);
+            const probeLengthPx = (C / F / 4) * scaleX; // Quarter wavelength
+            ctx.fillStyle = '#FFD700'; // Gold for copper probe
+            ctx.fillRect(probeX, canY - canHeight/2, 5, canHeight);
+            
+            // Draw cable
+            ctx.strokeStyle = '#0000FF'; // Blue for cable
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(canX - connectorSize/2, canY);
+            ctx.lineTo(0, canY);
+            ctx.stroke();
+            
+            // Add labels
+            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('Can Body', canX + canWidth/2 - 30, canY - canHeight/2 - 10);
+            ctx.fillText('N-Type Connector', canX - 60, canY - canHeight/2 - 10);
+            ctx.fillText('Copper Probe', probeX - 30, canY - canHeight/2 - 30);
+            ctx.fillText('LMR400 Cable', 10, canY - 20);
+            
+            // Draw dimensions
+            drawDimension(ctx, canX, canY - canHeight/2 - 20, canX + canWidth, canY - canHeight/2 - 20, `Length: ${(length * 100).toFixed(1)} cm`);
+            drawDimension(ctx, canX + canWidth + 10, canY - canHeight/2, canX + canWidth + 10, canY + canHeight/2, `Diameter: ${(diameter * 100).toFixed(1)} cm`);
+            drawDimension(ctx, canX, canY + canHeight/2 + 10, probeX, canY + canHeight/2 + 10, `Probe Offset: ${(probeOffset * 100).toFixed(1)} cm`);
+        }
+
+        // Helper function to draw dimension lines with text
+        function drawDimension(ctx, x1, y1, x2, y2, text) {
+            ctx.strokeStyle = isDarkMode ? '#e0e0e0' : '#333';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 3]);
+            
+            // Draw dimension line
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            // Draw arrowheads
+            drawArrowhead(ctx, x1, y1, x2, y2);
+            drawArrowhead(ctx, x2, y2, x1, y1);
+            
+            // Reset line dash
+            ctx.setLineDash([]);
+            
+            // Draw text
+            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';
+            ctx.font = '12px Arial';
+            const textX = (x1 + x2) / 2 - ctx.measureText(text).width / 2;
+            const textY = y1 - 5;
+            ctx.fillText(text, textX, textY);
+        }
+
+        // Helper function to draw arrowheads
+        function drawArrowhead(ctx, x, y, tox, toy) {
+            const headlen = 10;
+            const angle = Math.atan2(toy - y, tox - x);
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+
+        // Clear simulation
+        function clearSimulation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Reset form
+        function resetForm() {
+            diameterInput.value = '0';
+            radiusInput.value = '0';
+            lengthInput.value = '0';
+            errorMessage.textContent = '';
+            hasError = false;
+            clearResults();
+            clearSimulation();
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            darkModeIcon.textContent = isDarkMode ? '☀️' : '🌙';
+            
+            // Redraw simulation with updated colors if needed
+            if (!hasError && parseFloat(diameterInput.value) > 0) {
+                const diameter = parseFloat(diameterInput.value) / 100;
+                const length = parseFloat(lengthInput.value) / 100;
+                const wavelength = C / F;
+                const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
+                const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
+                const probeOffset = guideWavelength / 4;
+                
+                updateSimulation(diameter, length, probeOffset);
+            }
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
