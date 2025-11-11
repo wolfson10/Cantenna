@@ -515,20 +515,20 @@
             <h2>Can Geometry</h2>
             <div class="input-group">
                 <label for="diameter">Diameter (D)</label>
-                <input type="number" id="diameter" min="0" step="0.1" value="0">
-                <div class="dimension-range">Range: 7.3cm - 20cm (for proper operation)</div>
+                <input type="number" id="diameter" min="7.3258" max="20" step="0.0001" value="0">
+                <div class="dimension-range">Required: 7.3258cm - 20cm (to allow 2.4 GHz propagation)</div>
             </div>
 
             <div class="input-group">
                 <label for="radius">Radius (r)</label>
-                <input type="number" id="radius" min="0" step="0.1" value="0">
-                <div class="dimension-range">Range: 3.65cm - 10cm (for proper operation)</div>
+                <input type="number" id="radius" min="3.6629" max="10" step="0.0001" value="0">
+                <div class="dimension-range">Required: 3.6629cm - 10cm (auto-syncs with diameter)</div>
             </div>
 
             <div class="input-group">
                 <label for="length">Length (L)</label>
-                <input type="number" id="length" min="0" step="0.1" value="0">
-                <div class="dimension-range">Range: 5cm - 50cm (minimum depends on diameter)</div>
+                <input type="number" id="length" min="5" max="50" step="0.1" value="0">
+                <div class="dimension-range">Practical Range: 5cm - 50cm (Min. length depends on diameter)</div>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -584,8 +584,7 @@
         <div class="card calculation-steps" id="calculationSteps" style="display: none;">
             <h2>Calculation Steps</h2>
             <div id="stepsContainer">
-                <!-- Calculation steps will be inserted here -->
-            </div>
+                </div>
         </div>
 
         <div class="card">
@@ -690,7 +689,8 @@
         function handleDiameterChange() {
             const diameter = parseFloat(diameterInput.value);
             if (!isNaN(diameter)) {
-                radiusInput.value = (diameter / 2).toFixed(1); // Update radius
+                // Update radius, maintaining precision
+                radiusInput.value = (diameter / 2).toFixed(4); 
             }
         }
 
@@ -698,7 +698,8 @@
         function handleRadiusChange() {
             const radius = parseFloat(radiusInput.value);
             if (!isNaN(radius)) {
-                diameterInput.value = (radius * 2).toFixed(1); // Update diameter
+                 // Update diameter, maintaining precision
+                diameterInput.value = (radius * 2).toFixed(4);
             }
         }
 
@@ -725,8 +726,8 @@
                 return;
             }
 
-            // Check diameter and radius consistency
-            if (Math.abs(diameter - 2 * radius) > 0.001) {
+            // Check diameter and radius consistency (using a small epsilon for float comparison)
+            if (Math.abs(diameter - 2 * radius) > 0.0001) {
                 errorMessage.textContent = 'Error: Diameter and radius do not match — diameter must always equal 2 × radius.';
                 errorMessage.classList.add('show');
                 hasError = true;
@@ -963,7 +964,7 @@
             
             // Draw arrowheads
             drawArrowhead(ctx, x1, y1, x2, y2);
-            drawArrowhead(ctx, x2, y2, x1, y1);
+            drawArrowhead(ctx, x2, y2, x1, yi);
             
             // Reset line dash
             ctx.setLineDash([]);
