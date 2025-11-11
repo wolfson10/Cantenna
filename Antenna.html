@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>2.4 GHz Wi-Fi Cantenna Design Tool (Vanilla HTML)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind Play CDN for quick styling; you can replace with your own CSS later -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Small tweaks for better readability */
+    .mono { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+    .card { @apply p-6 rounded-lg shadow-lg; }
+    .muted { @apply text-sm text-gray-600; }
+    .muted-dark { @apply text-sm text-gray-400; }
+    .dash { stroke-dasharray: 5,5; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="min-h-screen p-6 md:p-8" id="app">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">2.4 GHz Wi-Fi Cantenna Design Tool</h1>
+        <p id="subtitle" class="text-gray-600">Calculate optimal dimensions for your DIY directional antenna</p>
+      </div>
+      <button id="darkToggle"
+              class="p-3 rounded-lg bg-white hover:bg-gray-100 transition-colors"
+              title="Toggle dark mode"
+              aria-label="Toggle dark mode">
+        <span id="darkIcon" class="text-xl">🌙</span>
+      </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+      <!-- Input Card -->
+      <div id="inputCard" class="card bg-white mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Input Parameters <span class="text-sm text-gray-500">(cm)</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Diameter -->
+          <div>
+            <label class="block mb-2 font-medium" for="D">Can Diameter (D)</label>
+            <input id="D" type="number" step="0.1" value="0"
+                   class="w-full p-3 rounded-lg border-2 bg-white border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500" />
+            <p id="Dmin" class="muted mt-1">Min: — cm | Max: No limit</p>
+            <p id="errDiameter" class="text-red-600 text-sm mt-1 hidden"></p>
+          </div>
+
+          <!-- Radius -->
+          <div>
+            <label class="block mb-2 font-medium" for="r">Can Radius (r)</label>
+            <input id="r" type="number" step="0.1" value="0"
+                   class="w-full p-3 rounded-lg border-2 bg-white border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500" />
+            <p id="Rmin" class="muted mt-1">Min: — cm | Max: No limit</p>
+          </div>
+
+          <!-- Length -->
+          <div>
+            <label class="block mb-2 font-medium" for="L">Can Length (L)</label>
+            <input id="L" type="number" step="0.1" value="0"
+                   class="w-full p-3 rounded-lg border-2 bg-white border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500" />
+            <p id="Lmin" class="muted mt-1">Min: — cm | Max: No limit</p>
+            <p id="errLength" class="text-red-600 text-sm mt-1 hidden"></p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 mt-6">
+          <button id="calcBtn"
+                  class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+            <span>🧮</span> <span>Calculate</span>
+          </button>
+          <button id="resetBtn"
+                  class="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition-colors">
+            <span>🔄</span> <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsCard" class="card bg-white mb-6 hidden">
+        <h2 class="text-2xl font-semibold mb-4">Calculated Results</h2>
+        <div class="space-y-6">
+          <!-- λ -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Wavelength (λ)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> λ = c / f</p>
+              <p id="lambdaSub"></p>
+              <p id="lambdaRes"></p>
+            </div>
+          </div>
+          <!-- fc -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Cutoff Frequency (fc)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> fc = (1.8412 × c) / (π × D)</p>
+              <p id="fcConv"></p>
+              <p id="fcSub"></p>
+              <p id="fcRes"></p>
+            </div>
+          </div>
+          <!-- λg -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Guide Wavelength (λg)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> λg = λ / √(1 − (fc/f)²)</p>
+              <p id="lgSub"></p>
+              <p id="lgCalc"></p>
+              <p id="lgRes"></p>
+            </div>
+          </div>
+          <!-- Lp -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Probe Length (Lp)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> Lp = λ / 4</p>
+              <p id="lpSub"></p>
+              <p id="lpRes"></p>
+            </div>
+          </div>
+          <!-- D_back -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Probe Offset from Back Wall (D<sub>back</sub>)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> D<sub>back</sub> = λg / 4</p>
+              <p id="dbSub"></p>
+              <p id="dbRes"></p>
+            </div>
+          </div>
+          <!-- D_rim -->
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold text-lg mb-2">Distance from Probe to Open End (D<sub>rim</sub>)</h3>
+            <div class="space-y-1 text-sm text-gray-700 mono">
+              <p><strong>Formula:</strong> D<sub>rim</sub> = L − D<sub>back</sub></p>
+              <p id="drConv"></p>
+              <p id="drSub"></p>
+              <p id="drRes"></p>
+            </div>
+          </div>
+
+          <!-- Quick KPIs -->
+          <div class="p-4 rounded-lg bg-gray-100 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm mono">
+            <div><strong>Frequency (f):</strong> <span id="kpiF">2.4</span> GHz</div>
+            <div><strong>Cutoff (fc):</strong> <span id="kpiFc">—</span> GHz</div>
+            <div><strong>Guide λ (λg):</strong> <span id="kpiLg">—</span> cm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization -->
+      <div id="vizCard" class="card bg-white mb-6">
+        <h3 class="text-lg font-semibold mb-4" id="vizTitle">Can Cross-Section View</h3>
+        <div id="vizEmpty"
+             class="flex items-center justify-center h-96 border-2 border-dashed rounded-lg border-gray-300 bg-gray-50">
+          <p class="text-gray-500">Enter parameters and click <span class="font-semibold">Calculate</span> to see visualization</p>
+        </div>
+        <div id="vizWrap" class="hidden p-4 rounded-lg border-2 border-gray-300 bg-white overflow-auto">
+          <svg id="viz" width="100%" height="500" viewBox="0 0 800 500" aria-label="Cantenna cross-section"></svg>
+          <div id="vizKPIs" class="mt-4 p-4 rounded-lg bg-gray-100 text-sm grid grid-cols-1 md:grid-cols-2 gap-2 mono">
+            <div><strong>λ:</strong> <span id="kLambda">—</span> cm</div>
+            <div><strong>D<sub>rim</sub>:</strong> <span id="kDrim">—</span> cm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula Reference -->
+      <div id="refCard" class="card bg-white">
+        <h2 class="text-2xl font-semibold mb-4">Formula Reference</h2>
+        <div class="space-y-4 text-gray-700">
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Wavelength (λ = c / f)</h3>
+            <p class="text-sm">The distance between successive peaks of an EM wave. At 2.4 GHz it’s ≈12.49 cm in free space.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Cutoff Frequency (fc = 1.8412 × c / (π × D))</h3>
+            <p class="text-sm">Minimum frequency that propagates in a circular waveguide (TE<sub>11</sub> dominant mode; 1.8412 is the first root of the Bessel derivative). Ensure fc &lt; 2.4 GHz.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Guide Wavelength (λg = λ / √(1 − (fc/f)²))</h3>
+            <p class="text-sm">Wavelength inside the guide; longer than free-space λ due to zig-zag propagation.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Probe Length (Lp = λ / 4)</h3>
+            <p class="text-sm">Quarter-wave monopole fed by an N-type connector; copper wire ≈2–3 mm diameter works well.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Probe Offset (D<sub>back</sub> = λg / 4)</h3>
+            <p class="text-sm">Place the probe at a quarter guide wavelength from the back wall to hit an E-field maximum.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Rim Distance (D<sub>rim</sub> = L − D<sub>back</sub>)</h3>
+            <p class="text-sm">Distance from probe to the open end; larger values increase directivity but also size.</p>
+          </div>
+          <div class="p-4 rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">System Assumptions</h3>
+            <ul class="list-disc list-inside text-sm">
+              <li>N-type female on the back wall; 50 Ω system</li>
+              <li>TE<sub>11</sub> mode; ideal conductor walls</li>
+              <li>Coax losses not modeled</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /max-w -->
+  </div> <!-- /app -->
+
+  <script>
+    // ========= Constants =========
+    const c = 299792458;     // m/s
+    const f = 2.4e9;         // Hz (fixed)
+    const LS_KEY = "cantenna-vanilla-dark";
+
+    // ========= Elements =========
+    const body = document.body;
+    const darkToggle = document.getElementById("darkToggle");
+    const darkIcon = document.getElementById("darkIcon");
+    const subtitle = document.getElementById("subtitle");
+
+    const DInput = document.getElementById("D");
+    const rInput = document.getElementById("r");
+    const LInput = document.getElementById("L");
+
+    const DminP = document.getElementById("Dmin");
+    const RminP = document.getElementById("Rmin");
+    const LminP = document.getElementById("Lmin");
+
+    const errDiameter = document.getElementById("errDiameter");
+    const errLength = document.getElementById("errLength");
+
+    const calcBtn = document.getElementById("calcBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const resultsCard = document.getElementById("resultsCard");
+
+    // Results text holders
+    const lambdaSub = document.getElementById("lambdaSub");
+    const lambdaRes = document.getElementById("lambdaRes");
+    const fcConv    = document.getElementById("fcConv");
+    const fcSub     = document.getElementById("fcSub");
+    const fcRes     = document.getElementById("fcRes");
+    const lgSub     = document.getElementById("lgSub");
+    const lgCalc    = document.getElementById("lgCalc");
+    const lgRes     = document.getElementById("lgRes");
+    const lpSub     = document.getElementById("lpSub");
+    const lpRes     = document.getElementById("lpRes");
+    const dbSub     = document.getElementById("dbSub");
+    const dbRes     = document.getElementById("dbRes");
+    const drConv    = document.getElementById("drConv");
+    const drSub     = document.getElementById("drSub");
+    const drRes     = document.getElementById("drRes");
+
+    const kpiF  = document.getElementById("kpiF");
+    const kpiFc = document.getElementById("kpiFc");
+    const kpiLg = document.getElementById("kpiLg");
+
+    // Visualization
+    const vizEmpty = document.getElementById("vizEmpty");
+    const vizWrap  = document.getElementById("vizWrap");
+    const viz     = document.getElementById("viz");
+    const kLambda = document.getElementById("kLambda");
+    const kDrim   = document.getElementById("kDrim");
+
+    // ========= Dark Mode =========
+    function setDark(on) {
+      body.classList.toggle("bg-gray-900", on);
+      body.classList.toggle("text-white", on);
+
+      // Toggle cards/backgrounds
+      document.querySelectorAll(".card").forEach(el => {
+        el.classList.toggle("bg-gray-800", on);
+        el.classList.toggle("bg-white", !on);
+      });
+      // Muted text swaps
+      subtitle.classList.toggle("text-gray-400", on);
+      subtitle.classList.toggle("text-gray-600", !on);
+
+      document.querySelectorAll(".muted").forEach(p => {
+        p.classList.toggle("text-gray-400", on);
+        p.classList.toggle("text-gray-600", !on);
+      });
+
+      // Inputs and borders
+      [DInput, rInput, LInput].forEach(inp => {
+        inp.className =
+          "w-full p-3 rounded-lg border-2 focus:outline-none focus:border-blue-500 " +
+          (on ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900");
+      });
+
+      // Cards that use bg-gray-50/bg-gray-100 inside results
+      document.querySelectorAll(".bg-gray-50, .bg-gray-100, .border-gray-300, .text-gray-700").forEach(el => {
+        if (on) {
+          if (el.classList.contains("bg-gray-50")) el.classList.replace("bg-gray-50", "bg-gray-700");
+          if (el.classList.contains("bg-gray-100")) el.classList.replace("bg-gray-100", "bg-gray-700");
+          if (el.classList.contains("text-gray-700")) el.classList.replace("text-gray-700", "text-gray-300");
+          if (el.classList.contains("border-gray-300")) el.classList.replace("border-gray-300", "border-gray-600");
+        } else {
+          if (el.classList.contains("bg-gray-700")) el.classList.add("bg-gray-50");
+          el.classList.remove("bg-gray-700");
+          if (el.classList.contains("text-gray-300")) el.classList.replace("text-gray-300", "text-gray-700");
+          if (el.classList.contains("border-gray-600")) el.classList.replace("border-gray-600", "border-gray-300");
+        }
+      });
+
+      // Viz states
+      vizEmpty.classList.toggle("bg-gray-800", on);
+      vizEmpty.classList.toggle("bg-gray-50", !on);
+      vizEmpty.classList.toggle("border-gray-600", on);
+      vizEmpty.classList.toggle("border-gray-300", !on);
+
+      vizWrap.classList.toggle("bg-gray-800", on);
+      vizWrap.classList.toggle("bg-white", !on);
+      vizWrap.classList.toggle("border-gray-600", on);
+      vizWrap.classList.toggle("border-gray-300", !on);
+
+      // Toggle button style + icon
+      darkToggle.className =
+        "p-3 rounded-lg transition-colors " +
+        (on ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100");
+      darkIcon.textContent = on ? "☀️" : "🌙";
+
+      // Persist
+      try { localStorage.setItem(LS_KEY, on ? "1" : "0"); } catch {}
+    }
+
+    // Initialize dark mode from localStorage
+    (function initDark() {
+      let on = false;
+      try { on = localStorage.getItem(LS_KEY) === "1"; } catch {}
+      setDark(on);
+    })();
+
+    darkToggle.addEventListener("click", () => {
+      const on = localStorage.getItem(LS_KEY) !== "1";
+      setDark(on);
+    });
+
+    // ========= Physics helpers =========
+    function minDiameterCm() {
+      // D > (1.8412 * c) / (π * f)  [meters] → cm
+      return (1.8412 * c) / (Math.PI * f) * 100.0;
+    }
+
+    function guideLengthFromD_cm(D_cm) {
+      // returns { valid, lambda, fc, lambda_g, D_back_m }
+      const Dm = D_cm / 100.0;
+      const fc = (1.8412 * c) / (Math.PI * Dm);
+      const lambda = c / f;
+      if (fc >= f) {
+        return { valid: false, lambda, fc, lambda_g: NaN, D_back_m: NaN };
+      }
+      const ratio = fc / f;
+      const lambda_g = lambda / Math.sqrt(1.0 - ratio * ratio);
+      return { valid: true, lambda, fc, lambda_g, D_back_m: lambda_g / 4.0 };
+    }
+
+    function fmt(num, digits=4) {
+      if (!isFinite(num)) return "—";
+      return Number(num).toFixed(digits);
+    }
+
+    // ========= Min labels update =========
+    function refreshMinLabels() {
+      const Dmin = minDiameterCm();
+      DminP.textContent = `Min: ${fmt(Dmin, 2)} cm | Max: No limit`;
+      RminP.textContent = `Min: ${fmt(Dmin/2, 2)} cm | Max: No limit`;
+
+      const Dval = parseFloat(DInput.value) || 0;
+      const g = guideLengthFromD_cm(Dval);
+      const Lmin = g.valid ? g.D_back_m * 100.0 : 0;
+      LminP.textContent = `Min: ${fmt(Lmin, 2)} cm | Max: No limit`;
+    }
+
+    // ========= Validation + Calculation =========
+    function validate() {
+      errDiameter.classList.add("hidden");
+      errLength.classList.add("hidden");
+      errDiameter.textContent = "";
+      errLength.textContent = "";
+
+      const D = parseFloat(DInput.value) || 0;
+      const L = parseFloat(LInput.value) || 0;
+
+      // Check diameter via cutoff
+      const g = guideLengthFromD_cm(D);
+      if (!g.valid) {
+        errDiameter.textContent = "Error: Can diameter is too small. The cutoff frequency (fc) exceeds 2.4 GHz. Increase the diameter.";
+        errDiameter.classList.remove("hidden");
+        return { ok: false };
+      }
+
+      // Check length >= D_back
+      const Lmin_cm = g.D_back_m * 100.0;
+      if ((L / 100.0) < g.D_back_m) {
+        errLength.textContent = "Error: Can length is too short. The calculated probe position (D_back) is outside the can. Increase the length.";
+        errLength.classList.remove("hidden");
+        return { ok: false };
+      }
+
+      return {
+        ok: true,
+        Dm: D / 100.0,
+        Lm: L / 100.0,
+        lambda: g.lambda,
+        fc: g.fc,
+        lambda_g: g.lambda_g,
+        Lp: g.lambda / 4.0,
+        D_back: g.D_back_m,
+        D_rim: (L / 100.0) - g.D_back_m
+      };
+    }
+
+    function fillResults(res) {
+      // λ
+      lambdaSub.textContent = `Substitution: λ = 299,792,458 m/s / 2,400,000,000 Hz`;
+      lambdaRes.textContent = `Result: λ = ${fmt(res.lambda * 100, 4)} cm`;
+
+      // fc
+      fcConv.textContent = `Unit Conversion: D = ${(res.Dm * 100).toFixed(2)} cm = ${fmt(res.Dm, 4)} m`;
+      fcSub.textContent  = `Substitution: fc = (1.8412 × 299,792,458) / (π × ${fmt(res.Dm, 4)})`;
+      fcRes.textContent  = `Result: fc = ${fmt(res.fc / 1e9, 4)} GHz`;
+
+      // λg
+      const fGHz = (f / 1e9).toFixed(1);
+      lgSub.textContent = `Substitution: λg = ${fmt(res.lambda * 100, 4)} cm / √(1 − (${fmt(res.fc/1e9,4)}/${fGHz})²)`;
+      lgCalc.textContent = `Calculation: λg = ${fmt(res.lambda * 100, 4)} / ${fmt(Math.sqrt(1 - (res.fc/f)**2), 4)}`;
+      lgRes.textContent  = `Result: λg = ${fmt(res.lambda_g * 100, 4)} cm`;
+
+      // Lp
+      lpSub.textContent = `Substitution: Lp = ${fmt(res.lambda * 100, 4)} cm / 4`;
+      lpRes.textContent = `Result: Lp = ${fmt(res.Lp * 100, 4)} cm`;
+
+      // D_back
+      dbSub.textContent = `Substitution: D_back = ${fmt(res.lambda_g * 100, 4)} cm / 4`;
+      dbRes.textContent = `Result: D_back = ${fmt(res.D_back * 100, 4)} cm`;
+
+      // D_rim
+      drConv.textContent = `Unit Conversion: L = ${fmt(res.Lm * 100, 2)} cm = ${fmt(res.Lm, 4)} m`;
+      drSub.textContent  = `Substitution: D_rim = ${fmt(res.Lm, 4)} m − ${fmt(res.D_back, 4)} m`;
+      drRes.textContent  = `Result: D_rim = ${fmt(res.D_rim * 100, 4)} cm`;
+
+      // KPIs
+      kpiF.textContent  = fGHz;
+      kpiFc.textContent = fmt(res.fc / 1e9, 3);
+      kpiLg.textContent = fmt(res.lambda_g * 100, 2);
+    }
+
+    function drawViz(D_cm, L_cm, res) {
+      // Show wrap, hide empty
+      vizEmpty.classList.add("hidden");
+      vizWrap.classList.remove("hidden");
+
+      // Clear SVG
+      while (viz.firstChild) viz.removeChild(viz.firstChild);
+
+      const scale = 200 / Math.max(L_cm || 1, D_cm || 1);
+      const canWidth  = D_cm * scale; // vertical dimension
+      const canHeight = L_cm * scale; // horizontal dimension
+      const probeLen  = res.Lp * 100 * scale;
+      const probeOff  = res.D_back * 100 * scale;
+
+      // Helpers
+      function line(x1,y1,x2,y2, stroke="#4b5563", w=2, dash=false) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg","line");
+        el.setAttribute("x1", x1); el.setAttribute("y1", y1);
+        el.setAttribute("x2", x2); el.setAttribute("y2", y2);
+        el.setAttribute("stroke", stroke); el.setAttribute("stroke-width", w);
+        if (dash) el.setAttribute("stroke-dasharray","5,5");
+        viz.appendChild(el);
+        return el;
+      }
+      function rect(x,y,w,h, fill="#e5e7eb", stroke="#9ca3af", sw=2) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg","rect");
+        el.setAttribute("x", x); el.setAttribute("y", y);
+        el.setAttribute("width", w); el.setAttribute("height", h);
+        el.setAttribute("fill", fill); el.setAttribute("stroke", stroke);
+        el.setAttribute("stroke-width", sw);
+        viz.appendChild(el);
+        return el;
+      }
+      function circle(cx,cy,r, fill="#f59e0b") {
+        const el = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        el.setAttribute("cx", cx); el.setAttribute("cy", cy);
+        el.setAttribute("r", r); el.setAttribute("fill", fill);
+        viz.appendChild(el);
+        return el;
+      }
+      function text(x,y, str, fill="#4b5563", size=12, weight="normal", anchor="start") {
+        const el = document.createElementNS("http://www.w3.org/2000/svg","text");
+        el.setAttribute("x", x); el.setAttribute("y", y);
+        el.setAttribute("fill", fill); el.setAttribute("font-size", size);
+        el.setAttribute("font-weight", weight);
+        el.setAttribute("text-anchor", anchor);
+        el.textContent = str;
+        viz.appendChild(el);
+        return el;
+      }
+
+      // Colors (light theme default; will still read fine in dark)
+      const colBody   = "#e5e7eb";
+      const colBodySt = "#9ca3af";
+      const colBack   = "#4b5563";
+      const colOpen   = "#3b82f6";
+      const colProbe  = "#f59e0b";
+      const colDback  = "#dc2626";
+      const colLp     = "#059669";
+      const colL      = "#7c3aed";
+      const colD      = "#db2777";
+      const colLabel  = "#4b5563";
+
+      // Can body
+      const X0 = 300;
+      const Y0 = 250;
+      rect(X0, Y0 - canWidth/2, canHeight, canWidth, colBody, colBodySt, 2);
+
+      // Back wall
+      line(X0, Y0 - canWidth/2, X0, Y0 + canWidth/2, colBack, 3);
+
+      // Open end
+      line(X0 + canHeight, Y0 - canWidth/2, X0 + canHeight, Y0 + canWidth/2, colOpen, 2, true);
+
+      // Probe
+      circle(X0 + probeOff, Y0, 4, colProbe);
+      line(X0 + probeOff, Y0, X0 + probeOff, Y0 - probeLen, colProbe, 3);
+
+      // D_back annotation (horizontal below)
+      line(X0, Y0 + canWidth/2 + 30, X0 + probeOff, Y0 + canWidth/2 + 30, colDback, 2);
+      line(X0, Y0 + canWidth/2 + 25, X0, Y0 + canWidth/2 + 35, colDback, 2);
+      line(X0 + probeOff, Y0 + canWidth/2 + 25, X0 + probeOff, Y0 + canWidth/2 + 35, colDback, 2);
+      text(X0 + probeOff/2, Y0 + canWidth/2 + 50, `D_back = ${fmt(res.D_back*100, 2)} cm`, colDback, 14, "bold","middle");
+
+      // Lp annotation (vertical)
+      line(X0 + probeOff + 20, Y0, X0 + probeOff + 20, Y0 - probeLen, colLp, 2);
+      text(X0 + probeOff + 35, Y0 - probeLen/2, `Lp = ${fmt(res.Lp*100, 2)} cm`, colLp, 14, "bold");
+
+      // L annotation (top)
+      line(X0, Y0 - canWidth/2 - 30, X0 + canHeight, Y0 - canWidth/2 - 30, colL, 2);
+      text(X0 + canHeight/2, Y0 - canWidth/2 - 40, `L = ${fmt(L_cm, 2)} cm`, colL, 14, "bold","middle");
+
+      // D annotation (left)
+      line(X0 - 20, Y0 - canWidth/2, X0 - 20, Y0 + canWidth/2, colD, 2);
+      text(X0 - 40, Y0, `D = ${fmt(D_cm, 2)} cm`, colD, 14, "bold","end");
+
+      // Labels
+      text(X0, Y0 - canWidth/2 - 10, "Back Wall", colLabel, 12, "normal","middle");
+      text(X0 + canHeight, Y0 - canWidth/2 - 10, "Open End", "#3b82f6", 12, "normal","middle");
+      text(X0 + probeOff, Y0 + 15, "Probe", colProbe, 12, "bold","middle");
+
+      // KPIs in viz
+      kLambda.textContent = fmt(res.lambda * 100, 2);
+      kDrim.textContent   = fmt(res.D_rim * 100, 2);
+    }
+
+    // ========= Wiring =========
+    function syncFromD() {
+      const D = parseFloat(DInput.value);
+      rInput.value = isFinite(D) ? (D/2).toFixed(2) : "0";
+      refreshMinLabels();
+    }
+
+    function syncFromR() {
+      const r = parseFloat(rInput.value);
+      const D = isFinite(r) ? (r*2) : 0;
+      DInput.value = isFinite(D) ? D.toFixed(2) : "0";
+      refreshMinLabels();
+    }
+
+    DInput.addEventListener("input", syncFromD);
+    rInput.addEventListener("input", syncFromR);
+    LInput.addEventListener("input", refreshMinLabels);
+
+    calcBtn.addEventListener("click", () => {
+      const D = parseFloat(DInput.value) || 0;
+      const L = parseFloat(LInput.value) || 0;
+      const v = validate();
+      if (!v.ok) {
+        // Hide results but keep viz in idle
+        resultsCard.classList.add("hidden");
+        vizWrap.classList.add("hidden");
+        vizEmpty.classList.remove("hidden");
+        return;
+      }
+      resultsCard.classList.remove("hidden");
+      fillResults(v);
+      drawViz(D, L, v);
+    });
+
+    resetBtn.addEventListener("click", () => {
+      DInput.value = "0";
+      rInput.value = "0";
+      LInput.value = "0";
+      errDiameter.classList.add("hidden");
+      errLength.classList.add("hidden");
+      errDiameter.textContent = "";
+      errLength.textContent = "";
+      resultsCard.classList.add("hidden");
+      vizWrap.classList.add("hidden");
+      vizEmpty.classList.remove("hidden");
+      refreshMinLabels();
+    });
+
+    // Initial labels on load
+    refreshMinLabels();
+  </script>
+</body>
+</html>
