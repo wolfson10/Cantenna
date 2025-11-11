@@ -578,7 +578,7 @@
             // Update results if no errors
             if (!hasError) {
                 updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
-                updateSimulation(diameter, length, wireOffset);
+                updateSimulation(diameter, length, wireOffset, wireLength);
                 showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
             }
         }
@@ -692,8 +692,8 @@
             calculationSteps.style.display = 'block';
         }
 
-        // Update simulation
-        function updateSimulation(diameter, length, wireOffset) {
+        // Update simulation - CORRECTED VERSION
+        function updateSimulation(diameter, length, wireOffset, wireLength) {
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -701,45 +701,65 @@
             const scaleX = canvas.width / (length * 1.2); // Add some padding
             const scaleY = canvas.height / (diameter * 3); // Make it visually appealing
             
-            // Draw can body
-            const canX = 50;
+            // Draw can body (side view)
+            const canX = 100;
             const canY = canvas.height / 2;
             const canWidth = length * scaleX;
             const canHeight = diameter * scaleY;
             
+            // Draw can as a cylinder (side view)
             ctx.fillStyle = '#8B4513'; // Brown for can
             ctx.fillRect(canX, canY - canHeight/2, canWidth, canHeight);
             
-            // Draw connector at the back
-            const connectorSize = Math.min(canHeight * 0.3, 30);
+            // Draw the back of the can
+            ctx.fillStyle = '#A0522D'; // Darker brown for back
+            ctx.fillRect(canX, canY - canHeight/2, 5, canHeight);
+            
+            // Draw N-type connector on the side wall at the calculated offset
+            const connectorX = canX + (wireOffset * scaleX);
+            const connectorSize = Math.min(canHeight * 0.15, 20);
+            
+            // Draw connector body on the side of the can
             ctx.fillStyle = '#C0C0C0'; // Silver for connector
-            ctx.fillRect(canX - connectorSize/2, canY - connectorSize/2, connectorSize, connectorSize);
+            ctx.fillRect(connectorX - connectorSize/2, canY + canHeight/2, connectorSize, connectorSize * 1.5);
             
-            // Draw copper wire
-            const wireX = canX + (wireOffset * scaleX);
-            ctx.fillStyle = '#FFD700'; // Gold for copper wire
-            ctx.fillRect(wireX, canY - canHeight/2, 5, canHeight);
+            // Draw copper wire extending from the connector into the can
+            const wireStartX = connectorX;
+            const wireStartY = canY + canHeight/2;
+            const wireEndX = wireStartX;
+            const wireEndY = canY - canHeight/2 + (wireLength * scaleY);
             
-            // Draw cable
+            ctx.strokeStyle = '#FFD700'; // Gold for copper wire
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(wireStartX, wireStartY);
+            ctx.lineTo(wireEndX, wireEndY);
+            ctx.stroke();
+            
+            // Draw LMR400 cable coming out from the connector
             ctx.strokeStyle = '#0000FF'; // Blue for cable
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(canX - connectorSize/2, canY);
-            ctx.lineTo(0, canY);
+            ctx.moveTo(connectorX, canY + canHeight/2 + connectorSize * 1.5);
+            ctx.lineTo(connectorX, canY + canHeight/2 + connectorSize * 3);
+            ctx.lineTo(canX + canWidth + 50, canY + canHeight/2 + connectorSize * 3);
             ctx.stroke();
             
             // Add labels
             ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';
             ctx.font = '14px Arial';
             ctx.fillText('Can Body', canX + canWidth/2 - 30, canY - canHeight/2 - 10);
-            ctx.fillText('N-Type Connector', canX - 60, canY - canHeight/2 - 10);
-            ctx.fillText('Copper Wire', wireX - 30, canY - canHeight/2 - 30);
-            ctx.fillText('LMR400 Cable', 10, canY - 20);
+            ctx.fillText('N-Type Connector', connectorX - 40, canY + canHeight/2 + connectorSize * 2);
+            ctx.fillText('Copper Wire', wireStartX - 40, canY);
+            ctx.fillText('LMR400 Cable', canX + canWidth + 10, canY + canHeight/2 + connectorSize * 3 - 5);
             
             // Draw dimensions
             drawDimension(ctx, canX, canY - canHeight/2 - 20, canX + canWidth, canY - canHeight/2 - 20, `Length: ${(length * 100).toFixed(1)} cm`);
             drawDimension(ctx, canX + canWidth + 10, canY - canHeight/2, canX + canWidth + 10, canY + canHeight/2, `Diameter: ${(diameter * 100).toFixed(1)} cm`);
-            drawDimension(ctx, canX, canY + canHeight/2 + 10, wireX, canY + canHeight/2 + 10, `Wire Offset: ${(wireOffset * 100).toFixed(1)} cm`);
+            drawDimension(ctx, canX, canY + canHeight/2 + 10, connectorX, canY + canHeight/2 + 10, `Wire Offset: ${(wireOffset * 100).toFixed(1)} cm`);
+            
+            // Draw wire length dimension
+            drawDimension(ctx, wireStartX + 20, wireStartY, wireStartX + 20, wireEndY, `Wire Length: ${(wireLength * 100).toFixed(1)} cm`);
         }
 
         // Helper function to draw dimension lines with text
@@ -812,9 +832,10 @@
                 const wavelength = C / F;
                 const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
                 const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
+                const wireLength = wavelength / 4;
                 const wireOffset = guideWavelength / 4;
                 
-                updateSimulation(diameter, length, wireOffset);
+                updateSimulation(diameter, length, wireOffset, wireLength);
             }
         }
 
