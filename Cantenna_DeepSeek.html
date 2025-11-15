@@ -20,7 +20,7 @@
             --shadow: 0 4px 12px rgba(0,0,0,0.08);
             --gradient: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
         }
-        
+
         .dark-mode {
             --bg-color: #1a1a1a;
             --text-color: #e9ecef;
@@ -334,27 +334,21 @@
             body {
                 padding: 10px;
             }
-
             header {
                 padding: 20px 15px;
             }
-
             h1 {
                 font-size: 1.5rem;
             }
-
             .card {
                 padding: 15px;
             }
-
             .button-group {
                 flex-direction: column;
             }
-
             .results {
                 grid-template-columns: 1fr;
             }
-
             .dark-mode-toggle {
                 width: 45px;
                 height: 45px;
@@ -365,718 +359,909 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>2.4 GHz Wi-Fi Cantenna Designer</h1>
-            <p class="subtitle">Accurate cantenna design with waveguide theory</p>
-            <div class="frequency-badge">Fixed Frequency: 2.4 GHz (WiFi Channel 1-13)</div>
-        </header>
+<div class="container">
+    <header>
+        <h1>2.4 GHz Wi-Fi Cantenna Designer</h1>
+        <p class="subtitle">Accurate cantenna design with waveguide theory</p>
+        <div class="frequency-badge">Fixed Frequency: 2.4 GHz (Wi-Fi Channels 1–13)</div>
+    </header>
 
-        <div class="dark-mode-toggle" id="darkModeToggle">
-            <span id="darkModeIcon">🌙</span>
-        </div>
+    <div class="dark-mode-toggle" id="darkModeToggle">
+        <span id="darkModeIcon">🌙</span>
+    </div>
 
-        <div class="card">
-            <h2>Can Geometry</h2>
-            <div class="input-group">
-                <label for="diameter">Diameter (D) in cm</label>
-                <input type="number" id="diameter" min="7.33" max="15" step="0.01" placeholder="Enter diameter (7.33 - 15 cm)">
-                <div class="dimension-range">Min: 7.33 cm (cutoff at 2.4 GHz) | Max: 15 cm (avoid higher modes)</div>
-            </div>
-
-            <div class="input-group">
-                <label for="length">Length (L) in cm</label>
-                <input type="number" id="length" min="5" max="50" step="0.1" placeholder="Enter length (5 - 50 cm)">
-                <div class="dimension-range">Typical: 10-30 cm | Minimum depends on diameter</div>
-            </div>
-
-            <div class="message" id="validationMessage"></div>
-
-            <div class="button-group">
-                <button id="calculateBtn" class="primary-btn" disabled>Calculate Design</button>
-                <button id="resetBtn" class="secondary-btn">Reset</button>
+    <div class="card">
+        <h2>Can Geometry</h2>
+        <div class="input-group">
+            <label for="diameter">Diameter (D) in cm</label>
+            <input type="number" id="diameter" min="7.33" max="15" step="0.01"
+                   placeholder="Enter diameter (7.33 - 15 cm)">
+            <div class="dimension-range">
+                Min: 7.33 cm (cutoff at 2.4 GHz) | Max: 15 cm (avoid higher modes)
             </div>
         </div>
 
-        <div class="card hidden" id="resultsCard">
-            <h2>Design Results</h2>
-            <div class="results">
-                <div class="result-item">
-                    <div class="result-label">Wavelength (λ)</div>
-                    <div class="result-value" id="wavelength">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Cutoff Freq (fc)</div>
-                    <div class="result-value" id="cutoffFreq">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Guide λ (λg)</div>
-                    <div class="result-value" id="guideWavelength">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Probe Length</div>
-                    <div class="result-value" id="wireLength">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Probe Position</div>
-                    <div class="result-value" id="wireOffset">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Est. Gain</div>
-                    <div class="result-value" id="estGain">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Est. VSWR</div>
-                    <div class="result-value" id="estVSWR">—</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Beamwidth</div>
-                    <div class="result-value" id="beamwidth">—</div>
-                </div>
-            </div>
-            <div class="message" id="designMessage"></div>
-        </div>
-
-        <div class="card hidden" id="visualCard">
-            <h2>Visual Simulation</h2>
-            <canvas id="simulationCanvas" width="800" height="400"></canvas>
-            <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
-                <strong>Legend:</strong> 
-                <span style="color: #8B4513;">█</span> Can Body • 
-                <span style="color: #FFD700;">█</span> Probe • 
-                <span style="color: #C0C0C0;">█</span> Connector
+        <div class="input-group">
+            <label for="length">Length (L) in cm</label>
+            <input type="number" id="length" min="5" max="50" step="0.1"
+                   placeholder="Enter length (5 - 50 cm)">
+            <div class="dimension-range">
+                Allowed: 5–50 cm | Optimal: 10–30 cm | Minimum depends on diameter
             </div>
         </div>
 
-        <div class="card hidden" id="calculationsCard">
-            <h2>Detailed Calculations</h2>
-            <div id="calculationsContent"></div>
-        </div>
+        <div class="message" id="validationMessage"></div>
 
-        <div class="card">
-            <h2>Reference Formulas</h2>
-            <div class="formula-section">
-                <div class="formula-item">
-                    <strong>Wavelength:</strong> λ = c / f
-                    <div class="formula-explanation">Where c = 3×10⁸ m/s (speed of light), f = 2.4×10⁹ Hz</div>
+        <div class="button-group">
+            <button id="calculateBtn" class="primary-btn" disabled>Calculate Design</button>
+            <button id="resetBtn" class="secondary-btn">Reset</button>
+        </div>
+    </div>
+
+    <div class="card hidden" id="resultsCard">
+        <h2>Design Results</h2>
+        <div class="results">
+            <div class="result-item">
+                <div class="result-label">Wavelength (λ)</div>
+                <div class="result-value" id="wavelength">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Cutoff Freq (fc)</div>
+                <div class="result-value" id="cutoffFreq">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Guide λ (λg)</div>
+                <div class="result-value" id="guideWavelength">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Probe Length</div>
+                <div class="result-value" id="wireLength">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Probe Position</div>
+                <div class="result-value" id="wireOffset">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Est. Gain</div>
+                <div class="result-value" id="estGain">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Est. VSWR</div>
+                <div class="result-value" id="estVSWR">—</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Beamwidth</div>
+                <div class="result-value" id="beamwidth">—</div>
+            </div>
+        </div>
+        <div class="message" id="designMessage"></div>
+    </div>
+
+    <div class="card hidden" id="visualCard">
+        <h2>Visual Simulation</h2>
+        <canvas id="simulationCanvas" width="800" height="400"></canvas>
+        <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+            <strong>Legend:</strong>
+            <span style="color: #8B4513;">█</span> Can Body •
+            <span style="color: #FFD700;">█</span> Probe •
+            <span style="color: #C0C0C0;">█</span> Connector
+        </div>
+    </div>
+
+    <div class="card hidden" id="calculationsCard">
+        <h2>Detailed Calculations</h2>
+        <div id="calculationsContent"></div>
+    </div>
+
+    <div class="card">
+        <h2>Reference Formulas</h2>
+        <div class="formula-section">
+            <div class="formula-item">
+                <strong>Wavelength:</strong> λ = c / f
+                <div class="formula-explanation">
+                    Where c = 3×10⁸ m/s (speed of light), f = 2.4×10⁹ Hz
                 </div>
-                <div class="formula-item">
-                    <strong>Cutoff Frequency:</strong> fc = (1.8412 × c) / (π × D)
-                    <div class="formula-explanation">Minimum frequency for TE₁₁ mode propagation in circular waveguide</div>
+            </div>
+            <div class="formula-item">
+                <strong>Cutoff Frequency:</strong> fc = (1.8412 × c) / (π × D)
+                <div class="formula-explanation">
+                    Minimum frequency for TE₁₁ mode propagation in a circular waveguide (D in meters).
                 </div>
-                <div class="formula-item">
-                    <strong>Guide Wavelength:</strong> λg = λ / √(1 − (fc/f)²)
-                    <div class="formula-explanation">Effective wavelength inside the waveguide (always longer than free-space λ)</div>
+            </div>
+            <div class="formula-item">
+                <strong>Guide Wavelength:</strong> λg = λ / √(1 − (fc/f)²)
+                <div class="formula-explanation">
+                    Effective wavelength inside the waveguide (always longer than free-space λ).
                 </div>
-                <div class="formula-item">
-                    <strong>Probe Length:</strong> Lp ≈ λ/4 × correction_factor
-                    <div class="formula-explanation">Quarter-wave monopole with empirical diameter correction</div>
+            </div>
+            <div class="formula-item">
+                <strong>Probe Length (Empirical):</strong>
+                Lp = (λ/4) × k(D),
+                with k(D) = clamp[0.85,0.97] (0.97 − 0.12·ln(D/7.33)),
+                D in cm.
+                <div class="formula-explanation">
+                    Quarter-wave monopole with logarithmic diameter correction.
+                    Small cans (≈7.3–8 cm) → k ≈ 0.95–0.97; large cans (≈15 cm) → k ≈ 0.88.
+                    We clamp k between 0.85 and 0.97 for realism.
                 </div>
-                <div class="formula-item">
-                    <strong>Probe Position:</strong> Dp = λg / 4
-                    <div class="formula-explanation">Quarter-wavelength from back wall for optimal standing wave</div>
+            </div>
+            <div class="formula-item">
+                <strong>Probe Position:</strong> Dp = λg / 4
+                <div class="formula-explanation">
+                    Quarter of the guide wavelength from the back wall to place the probe at the E-field maximum of the standing wave.
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Physical constants
-        const C = 3e8; // Speed of light (m/s)
-        const F = 2.4e9; // Frequency (Hz)
-        const LAMBDA = C / F; // Wavelength (m)
+<script>
+    // ========= CONSTANTS =========
+    const C = 3e8;       // Speed of light (m/s)
+    const F = 2.4e9;     // Frequency (Hz)
+    const LAMBDA = C / F; // Wavelength (m)
 
-        // DOM elements
-        const diameterInput = document.getElementById('diameter');
-        const lengthInput = document.getElementById('length');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const validationMessage = document.getElementById('validationMessage');
-        const resultsCard = document.getElementById('resultsCard');
-        const visualCard = document.getElementById('visualCard');
-        const calculationsCard = document.getElementById('calculationsCard');
-        const calculationsContent = document.getElementById('calculationsContent');
-        const designMessage = document.getElementById('designMessage');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = document.getElementById('darkModeIcon');
-        const canvas = document.getElementById('simulationCanvas');
-        const ctx = canvas.getContext('2d');
+    // ========= DOM ELEMENTS =========
+    const diameterInput = document.getElementById('diameter');
+    const lengthInput = document.getElementById('length');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const validationMessage = document.getElementById('validationMessage');
+    const resultsCard = document.getElementById('resultsCard');
+    const visualCard = document.getElementById('visualCard');
+    const calculationsCard = document.getElementById('calculationsCard');
+    const calculationsContent = document.getElementById('calculationsContent');
+    const designMessage = document.getElementById('designMessage');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const darkModeIcon = document.getElementById('darkModeIcon');
+    const canvas = document.getElementById('simulationCanvas');
+    const ctx = canvas.getContext('2d');
 
-        let isDarkMode = false;
-        let currentResults = null;
+    let isDarkMode = false;
+    let currentResults = null;
 
-        // ==================== VALIDATION ====================
+    // ========= VALIDATION =========
+    function validateInputs() {
+        const diameter = parseFloat(diameterInput.value);
+        const length = parseFloat(lengthInput.value);
 
-        function validateInputs() {
-            const diameter = parseFloat(diameterInput.value);
-            const length = parseFloat(lengthInput.value);
+        // Reset states
+        diameterInput.classList.remove('invalid', 'warning');
+        lengthInput.classList.remove('invalid', 'warning');
+        hideMessage(validationMessage);
+        calculateBtn.disabled = true;
 
-            // Clear previous states
-            diameterInput.classList.remove('invalid', 'warning');
-            lengthInput.classList.remove('invalid', 'warning');
-            hideMessage(validationMessage);
-            calculateBtn.disabled = true;
+        // Missing values
+        if (!diameterInput.value || !lengthInput.value) {
+            return false;
+        }
 
-            // Check if inputs exist and are numbers
-            if (!diameterInput.value || !lengthInput.value) {
-                return false;
-            }
+        // Not numbers
+        if (isNaN(diameter) || isNaN(length)) {
+            showMessage(validationMessage, 'error', 'Please enter valid numeric values.');
+            if (isNaN(diameter)) diameterInput.classList.add('invalid');
+            if (isNaN(length)) lengthInput.classList.add('invalid');
+            return false;
+        }
 
-            if (isNaN(diameter) || isNaN(length)) {
-                showMessage(validationMessage, 'error', 'Please enter valid numbers.');
-                diameterInput.classList.toggle('invalid', isNaN(diameter));
-                lengthInput.classList.toggle('invalid', isNaN(length));
-                return false;
-            }
+        // Positive checks
+        if (diameter <= 0) {
+            showMessage(validationMessage, 'error', 'Diameter must be greater than zero.');
+            diameterInput.classList.add('invalid');
+            return false;
+        }
+        if (length <= 0) {
+            showMessage(validationMessage, 'error', 'Length must be greater than zero.');
+            lengthInput.classList.add('invalid');
+            return false;
+        }
 
-            // Check for positive values
-            if (diameter <= 0) {
-                showMessage(validationMessage, 'error', 'Diameter must be greater than zero.');
-                diameterInput.classList.add('invalid');
-                return false;
-            }
+        // Diameter range (cm)
+        const minDiameter = 7.33;
+        const maxDiameter = 15;
 
-            if (length <= 0) {
-                showMessage(validationMessage, 'error', 'Length must be greater than zero.');
-                lengthInput.classList.add('invalid');
-                return false;
-            }
+        if (diameter < minDiameter) {
+            showMessage(
+                validationMessage,
+                'error',
+                `Diameter too small (min ${minDiameter} cm). Cutoff frequency would exceed 2.4 GHz.`
+            );
+            diameterInput.classList.add('invalid');
+            return false;
+        }
 
-            // Check diameter range
-            const minDiameter = 7.33;
-            const maxDiameter = 15;
+        if (diameter > maxDiameter) {
+            showMessage(
+                validationMessage,
+                'warning',
+                `Diameter exceeds ${maxDiameter} cm. Higher-order modes may propagate and degrade performance.`
+            );
+            diameterInput.classList.add('warning');
+            return false;
+        }
 
-            if (diameter < minDiameter) {
-                showMessage(validationMessage, 'error', `Diameter too small (min ${minDiameter} cm). Cutoff frequency would exceed 2.4 GHz.`);
-                diameterInput.classList.add('invalid');
-                return false;
-            }
+        // Length range (cm)
+        if (length < 5) {
+            showMessage(validationMessage, 'error', 'Length must be at least 5 cm.');
+            lengthInput.classList.add('invalid');
+            return false;
+        }
 
-            if (diameter > maxDiameter) {
-                showMessage(validationMessage, 'warning', `Diameter exceeds ${maxDiameter} cm. Higher-order modes may propagate, degrading performance.`);
-                diameterInput.classList.add('warning');
-                return false;
-            }
-
-            // Check length range
-            if (length < 5) {
-                showMessage(validationMessage, 'error', 'Length must be at least 5 cm.');
-                lengthInput.classList.add('invalid');
-                return false;
-            }
-
-            if (length > 50) {
-                showMessage(validationMessage, 'warning', 'Length exceeds 50 cm. Diminishing returns and increased loss expected.');
-                lengthInput.classList.add('warning');
-                return false;
-            }
-
-            // All validations passed
+        if (length > 50) {
+            showMessage(
+                validationMessage,
+                'warning',
+                'Length exceeds 50 cm. Very long cans may have increased losses and diminishing returns.'
+            );
+            lengthInput.classList.add('warning');
             calculateBtn.disabled = false;
             return true;
         }
 
-        // ==================== CALCULATIONS ====================
+        // 5–10 cm: warn but allow
+        if (length >= 5 && length < 10) {
+            showMessage(
+                validationMessage,
+                'warning',
+                'Length is short (5–10 cm). Gain will be limited but design is still valid.'
+            );
+            lengthInput.classList.add('warning');
+            calculateBtn.disabled = false;
+            return true;
+        }
 
-        function calculateDesign() {
-            const diameter = parseFloat(diameterInput.value) / 100; // Convert to meters
-            const length = parseFloat(lengthInput.value) / 100;
+        // >30–50 cm: warn but allow
+        if (length > 30 && length <= 50) {
+            showMessage(
+                validationMessage,
+                'warning',
+                'Length exceeds the optimal range (30+ cm). Diminishing returns expected.'
+            );
+            lengthInput.classList.add('warning');
+            calculateBtn.disabled = false;
+            return true;
+        }
 
-            // Validate one more time
-            if (!validateInputs()) {
+        // All checks ok
+        calculateBtn.disabled = false;
+        return true;
+    }
+
+    // ========= DESIGN CALCULATION =========
+    function calculateDesign() {
+        const diameterCm = parseFloat(diameterInput.value); // input in cm
+        const lengthCm = parseFloat(lengthInput.value);
+
+        // Final validation gate
+        if (!validateInputs()) {
+            clearResults();
+            return;
+        }
+
+        const diameter = diameterCm / 100; // m
+        const length = lengthCm / 100;     // m
+
+        try {
+            // Cutoff frequency (D in meters)
+            const fc = (1.8412 * C) / (Math.PI * diameter);
+
+            // fc must be below operating frequency
+            if (fc >= F) {
+                showMessage(
+                    validationMessage,
+                    'error',
+                    `BLOCKED: Cutoff frequency (${(fc / 1e9).toFixed(2)} GHz) ≥ 2.4 GHz. Increase diameter.`
+                );
+                diameterInput.classList.add('invalid');
                 clearResults();
                 return;
             }
 
-            try {
-                // Calculate cutoff frequency
-                const fc = (1.8412 * C) / (Math.PI * diameter);
-
-                // Critical check: fc must be below operating frequency
-                if (fc >= F) {
-                    showMessage(validationMessage, 'error', `BLOCKED: Cutoff frequency (${(fc/1e9).toFixed(2)} GHz) ≥ 2.4 GHz. Increase diameter.`);
-                    diameterInput.classList.add('invalid');
-                    clearResults();
-                    return;
-                }
-
-                // Calculate guide wavelength
-                const ratio = fc / F;
-                const denominator = 1 - Math.pow(ratio, 2);
-                
-                if (denominator <= 0 || !isFinite(denominator)) {
-                    throw new Error('Invalid guide wavelength calculation');
-                }
-
-                const guideWavelength = LAMBDA / Math.sqrt(denominator);
-
-                if (!isFinite(guideWavelength) || guideWavelength <= 0) {
-                    throw new Error('Guide wavelength calculation error');
-                }
-
-                // Calculate probe dimensions with correction factor
-                const probeLengthIdeal = LAMBDA / 4;
-                const correctionFactor = 0.95 - (diameter * 5); // Empirical correction
-                const probeLength = probeLengthIdeal * Math.max(0.85, correctionFactor);
-                
-                const probePosition = guideWavelength / 4;
-
-                // Check if can is long enough
-                const minLength = probePosition * 1.2; // Need at least 20% more
-                if (length < minLength) {
-                    showMessage(validationMessage, 'error', `Can too short. Minimum length: ${(minLength*100).toFixed(1)} cm for this diameter.`);
-                    lengthInput.classList.add('invalid');
-                    clearResults();
-                    return;
-                }
-
-                // Estimate performance metrics
-                const gain = estimateGain(diameter, length);
-                const vswr = estimateVSWR(diameter, length);
-                const beamwidth = estimateBeamwidth(diameter);
-
-                // Store results
-                currentResults = {
-                    wavelength: LAMBDA,
-                    cutoffFreq: fc,
-                    guideWavelength,
-                    probeLength,
-                    probePosition,
-                    gain,
-                    vswr,
-                    beamwidth,
-                    diameter,
-                    length
-                };
-
-                // Display results
-                displayResults();
-                generateWarnings();
-                showCalculations();
-                drawSimulation();
-
-            } catch (error) {
-                console.error('Calculation error:', error);
-                showMessage(validationMessage, 'error', 'Calculation error. Please check inputs.');
-                clearResults();
-            }
-        }
-
-        function estimateGain(diameter, length) {
-            // Simplified gain estimation (dBi)
-            const aperture = Math.PI * Math.pow(diameter/2, 2);
-            const efficiency = 0.6; // Typical for simple cantenna
-            const gain = 10 * Math.log10((4 * Math.PI * aperture * efficiency) / Math.pow(LAMBDA, 2));
-            return Math.max(3, Math.min(15, gain)); // Clamp to realistic range
-        }
-
-        function estimateVSWR(diameter, length) {
-            // Simplified VSWR estimation based on geometry
-            const idealRatio = length / diameter;
-            let vswr = 2.0;
-            
-            if (idealRatio > 3 && idealRatio < 6) {
-                vswr = 1.5;
-            } else if (idealRatio >= 6) {
-                vswr = 1.3;
-            }
-            
-            return vswr;
-        }
-
-        function estimateBeamwidth(diameter) {
-            // Approximate beamwidth in degrees
-            const beamwidth = 70 * (LAMBDA / diameter);
-            return Math.round(Math.max(30, Math.min(90, beamwidth)));
-        }
-
-        // ==================== DISPLAY ====================
-
-        function displayResults() {
-            if (!currentResults) return;
-
-            const r = currentResults;
-
-            document.getElementById('wavelength').textContent = (r.wavelength * 100).toFixed(2) + ' cm';
-            document.getElementById('cutoffFreq').textContent = (r.cutoffFreq / 1e9).toFixed(2) + ' GHz';
-            document.getElementById('guideWavelength').textContent = (r.guideWavelength * 100).toFixed(2) + ' cm';
-            document.getElementById('wireLength').textContent = (r.probeLength * 100).toFixed(2) + ' cm';
-            document.getElementById('wireOffset').textContent = (r.probePosition * 100).toFixed(2) + ' cm';
-            document.getElementById('estGain').textContent = r.gain.toFixed(1) + ' dBi';
-            document.getElementById('estVSWR').textContent = r.vswr.toFixed(1) + ':1';
-            document.getElementById('beamwidth').textContent = r.beamwidth + '°';
-
-            resultsCard.classList.remove('hidden');
-            visualCard.classList.remove('hidden');
-        }
-
-        function generateWarnings() {
-            if (!currentResults) return;
-
-            const r = currentResults;
-            const warnings = [];
-
-            // Length warnings
-            const lengthRatio = r.length / r.diameter;
-            if (lengthRatio < 2) {
-                warnings.push('⚠️ Can is very short - gain will be limited.');
-            } else if (lengthRatio > 8) {
-                warnings.push('⚠️ Very long can - diminishing returns, check for loss.');
-            }
-
-            // Diameter warnings
-            if (r.diameter * 100 > 12) {
-                warnings.push('⚠️ Large diameter - watch for higher-order mode issues.');
-            }
-
-            // Performance warnings
-            if (r.vswr > 2.0) {
-                warnings.push('⚠️ High VSWR expected - matching may be needed.');
-            }
-
-            if (warnings.length > 0) {
-                showMessage(designMessage, 'warning', warnings.join('<br>'));
-            } else {
-                showMessage(designMessage, 'info', '✓ Design looks good! Parameters are within optimal ranges.');
-            }
-        }
-
-        function clearResults() {
-            currentResults = null;
-            resultsCard.classList.add('hidden');
-            visualCard.classList.add('hidden');
-            calculationsCard.classList.add('hidden');
-            hideMessage(designMessage);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawSimulation() {
-            if (!currentResults) return;
-
-            const r = currentResults;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Calculate scale to fit canvas
-            const scale = Math.min(500 / (r.length * 100), 250 / (r.diameter * 100));
-            const canWidth = r.length * 100 * scale;
-            const canHeight = r.diameter * 100 * scale;
-            const canX = 150;
-            const canY = canvas.height / 2;
-
-            // Draw can body with gradient
-            const gradient = ctx.createLinearGradient(canX, canY - canHeight/2, canX, canY + canHeight/2);
-            gradient.addColorStop(0, isDarkMode ? '#7a5c3f' : '#A0522D');
-            gradient.addColorStop(0.5, isDarkMode ? '#654321' : '#8B4513');
-            gradient.addColorStop(1, isDarkMode ? '#543210' : '#654321');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(canX, canY - canHeight/2, canWidth, canHeight);
-
-            // Draw can outline
-            ctx.strokeStyle = isDarkMode ? '#8B6F47' : '#654321';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(canX, canY - canHeight/2, canWidth, canHeight);
-
-            // Draw back wall (closed end)
-            ctx.fillStyle = isDarkMode ? '#3a2817' : '#543210';
-            ctx.fillRect(canX, canY - canHeight/2, 6, canHeight);
-
-            // Draw open rim (front opening)
-            ctx.strokeStyle = isDarkMode ? '#666' : '#999';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(canX + canWidth, canY - canHeight/2);
-            ctx.lineTo(canX + canWidth, canY + canHeight/2);
-            ctx.stroke();
-
-            // Calculate probe position
-            const probeX = canX + (r.probePosition * 100 * scale);
-            const probeHeight = Math.min(r.probeLength * 100 * scale, canHeight * 0.8);
-
-            // Draw connector (N-type)
-            const connectorSize = Math.min(canHeight * 0.2, 25);
-            ctx.fillStyle = isDarkMode ? '#A0A0A0' : '#C0C0C0';
-            ctx.fillRect(probeX - connectorSize/2, canY + canHeight/2 - 2, connectorSize, connectorSize * 1.2);
-            
-            // Connector outline
-            ctx.strokeStyle = isDarkMode ? '#707070' : '#888';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(probeX - connectorSize/2, canY + canHeight/2 - 2, connectorSize, connectorSize * 1.2);
-
-            // Draw probe (copper wire) with glow effect
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#FFD700';
-            ctx.strokeStyle = '#FFD700';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(probeX, canY + canHeight/2);
-            ctx.lineTo(probeX, canY + canHeight/2 - probeHeight);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-
-            // Draw probe tip (solder point)
-            ctx.fillStyle = '#FFD700';
-            ctx.beginPath();
-            ctx.arc(probeX, canY + canHeight/2 - probeHeight, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Set text color based on mode
-            const textColor = isDarkMode ? '#e0e0e0' : '#333';
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 13px Arial';
-
-            // Draw dimension lines and labels
-            
-            // 1. Total length dimension (top)
-            drawDimensionLine(ctx, canX, canY - canHeight/2 - 30, canX + canWidth, canY - canHeight/2 - 30, 
-                `Length: ${(r.length*100).toFixed(1)} cm`, textColor);
-
-            // 2. Diameter dimension (right side)
-            drawDimensionLine(ctx, canX + canWidth + 20, canY - canHeight/2, canX + canWidth + 20, canY + canHeight/2, 
-                `D: ${(r.diameter*100).toFixed(1)} cm`, textColor, true);
-
-            // 3. Probe position from back (bottom)
-            drawDimensionLine(ctx, canX, canY + canHeight/2 + 20, probeX, canY + canHeight/2 + 20, 
-                `Position: ${(r.probePosition*100).toFixed(1)} cm`, textColor);
-
-            // 4. Probe length (left of probe)
-            const probeLabelX = probeX - 60;
-            drawDimensionLine(ctx, probeLabelX, canY + canHeight/2, probeLabelX, canY + canHeight/2 - probeHeight, 
-                `Probe: ${(r.probeLength*100).toFixed(1)} cm`, textColor, true);
-
-            // 5. Guide wavelength indicator (inside can, top)
-            const gwX1 = canX + 10;
-            const gwX2 = canX + 10 + (r.guideWavelength * 100 * scale);
-            ctx.strokeStyle = isDarkMode ? '#4cc9f0' : '#4361ee';
-            ctx.setLineDash([5, 5]);
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(gwX1, canY - canHeight/4);
-            ctx.lineTo(Math.min(gwX2, canX + canWidth - 10), canY - canHeight/4);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            ctx.fillStyle = isDarkMode ? '#4cc9f0' : '#4361ee';
-            ctx.font = '11px Arial';
-            ctx.fillText(`λg = ${(r.guideWavelength*100).toFixed(1)} cm`, gwX1, canY - canHeight/4 - 5);
-
-            // Add labels for key features
-            ctx.fillStyle = textColor;
-            ctx.font = '12px Arial';
-            
-            // Back wall label
-            ctx.fillText('Back Wall', canX + 10, canY - canHeight/2 + 15);
-            
-            // Open rim label
-            ctx.fillText('Open Rim', canX + canWidth - 50, canY - canHeight/2 + 15);
-            
-            // Connector label
-            ctx.fillText('N-Type', probeX - 20, canY + canHeight/2 + connectorSize * 1.5);
-
-            // Draw cutoff frequency status
-            const fcStatus = `fc = ${(r.cutoffFreq/1e9).toFixed(2)} GHz`;
-            ctx.fillStyle = r.cutoffFreq < F * 0.8 ? (isDarkMode ? '#2ecc71' : '#27ae60') : (isDarkMode ? '#f39c12' : '#e67e22');
-            ctx.font = 'bold 12px Arial';
-            ctx.fillText(fcStatus + ' < 2.4 GHz ✓', canX + canWidth - 150, canY + canHeight/2 + 50);
-        }
-
-        function drawDimensionLine(ctx, x1, y1, x2, y2, label, color, isVertical = false) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
-            ctx.setLineDash([3, 3]);
-            
-            // Main dimension line
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            
-            // End caps
-            ctx.setLineDash([]);
-            const capLength = 8;
-            if (isVertical) {
-                ctx.beginPath();
-                ctx.moveTo(x1 - capLength/2, y1);
-                ctx.lineTo(x1 + capLength/2, y1);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x2 - capLength/2, y2);
-                ctx.lineTo(x2 + capLength/2, y2);
-                ctx.stroke();
-            } else {
-                ctx.beginPath();
-                ctx.moveTo(x1, y1 - capLength/2);
-                ctx.lineTo(x1, y1 + capLength/2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x2, y2 - capLength/2);
-                ctx.lineTo(x2, y2 + capLength/2);
-                ctx.stroke();
-            }
-            
-            // Label
-            ctx.fillStyle = color;
-            ctx.font = '11px Arial';
-            const textX = (x1 + x2) / 2 - ctx.measureText(label).width / 2;
-            const textY = isVertical ? (y1 + y2) / 2 : y1 - 8;
-            
-            // Background for label
-            const metrics = ctx.measureText(label);
-            ctx.fillStyle = isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.9)';
-            ctx.fillRect(textX - 3, textY - 11, metrics.width + 6, 14);
-            
-            ctx.fillStyle = color;
-            ctx.fillText(label, textX, textY);
-        }
-
-        function showCalculations() {
-            if (!currentResults) return;
-
-            const r = currentResults;
-            const d_cm = r.diameter * 100;
-            const l_cm = r.length * 100;
-
-            let html = '';
-
-            // Step 1: Wavelength
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 1: Free-Space Wavelength (λ)</div>
-                    <div class="calc-formula">λ = c / f</div>
-                    <div class="calc-formula">λ = (3 × 10⁸ m/s) / (2.4 × 10⁹ Hz)</div>
-                    <div class="calc-formula">λ = ${r.wavelength.toFixed(6)} m = ${(r.wavelength*100).toFixed(2)} cm</div>
-                    <div class="calc-result">Result: Wavelength = ${(r.wavelength*100).toFixed(2)} cm</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        This is the wavelength in free space at 2.4 GHz. Our probe will be approximately λ/4 long.
-                    </div>
-                </div>
-            `;
-
-            // Step 2: Cutoff Frequency
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 2: Cutoff Frequency (fc)</div>
-                    <div class="calc-formula">fc = (1.8412 × c) / (π × D)</div>
-                    <div class="calc-formula">fc = (1.8412 × 3 × 10⁸) / (π × ${r.diameter.toFixed(4)})</div>
-                    <div class="calc-formula">fc = ${(1.8412 * C).toExponential(3)} / ${(Math.PI * r.diameter).toFixed(4)}</div>
-                    <div class="calc-formula">fc = ${r.cutoffFreq.toExponential(3)} Hz = ${(r.cutoffFreq/1e9).toFixed(3)} GHz</div>
-                    <div class="calc-result">Result: Cutoff Frequency = ${(r.cutoffFreq/1e9).toFixed(3)} GHz</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        This is the minimum frequency for TE₁₁ mode propagation. Must be below 2.4 GHz! 
-                        Ratio fc/f = ${(r.cutoffFreq/F).toFixed(3)}
-                    </div>
-                </div>
-            `;
-
-            // Step 3: Guide Wavelength
-            const ratio = r.cutoffFreq / F;
+            // Guide wavelength
+            const ratio = fc / F;
             const denominator = 1 - Math.pow(ratio, 2);
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 3: Guide Wavelength (λg)</div>
-                    <div class="calc-formula">λg = λ / √(1 − (fc/f)²)</div>
-                    <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(1 − (${ratio.toFixed(4)})²)</div>
-                    <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(1 − ${Math.pow(ratio, 2).toFixed(6)})</div>
-                    <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(${denominator.toFixed(6)})</div>
-                    <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / ${Math.sqrt(denominator).toFixed(6)}</div>
-                    <div class="calc-formula">λg = ${r.guideWavelength.toFixed(6)} m = ${(r.guideWavelength*100).toFixed(2)} cm</div>
-                    <div class="calc-result">Result: Guide Wavelength = ${(r.guideWavelength*100).toFixed(2)} cm</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        The guide wavelength is always longer than free-space λ because the wave travels at a reduced phase velocity inside the waveguide.
-                        Ratio λg/λ = ${(r.guideWavelength/r.wavelength).toFixed(3)}
-                    </div>
-                </div>
-            `;
 
-            // Step 4: Probe Length
-            const probeLengthIdeal = LAMBDA / 4;
-            const correctionFactor = 0.95 - (r.diameter * 5);
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 4: Probe Length (Quarter-Wave Monopole)</div>
-                    <div class="calc-formula">Lp_ideal = λ / 4 = ${probeLengthIdeal.toFixed(6)} m = ${(probeLengthIdeal*100).toFixed(2)} cm</div>
-                    <div class="calc-formula">Correction Factor = 0.95 - (D × 5) = ${correctionFactor.toFixed(4)}</div>
-                    <div class="calc-formula">Lp_actual = Lp_ideal × max(0.85, correction_factor)</div>
-                    <div class="calc-formula">Lp_actual = ${probeLengthIdeal.toFixed(6)} × ${Math.max(0.85, correctionFactor).toFixed(4)}</div>
-                    <div class="calc-formula">Lp_actual = ${r.probeLength.toFixed(6)} m = ${(r.probeLength*100).toFixed(2)} cm</div>
-                    <div class="calc-result">Result: Probe Length = ${(r.probeLength*100).toFixed(2)} cm</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        The probe acts as a quarter-wave monopole antenna. The correction factor accounts for the can diameter's effect on the probe's electrical length.
-                    </div>
-                </div>
-            `;
+            if (denominator <= 0 || !isFinite(denominator)) {
+                throw new Error('Invalid guide wavelength calculation');
+            }
 
-            // Step 5: Probe Position
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 5: Probe Position from Back Wall</div>
-                    <div class="calc-formula">Dp = λg / 4</div>
-                    <div class="calc-formula">Dp = ${r.guideWavelength.toFixed(6)} / 4</div>
-                    <div class="calc-formula">Dp = ${r.probePosition.toFixed(6)} m = ${(r.probePosition*100).toFixed(2)} cm</div>
-                    <div class="calc-result">Result: Probe Position = ${(r.probePosition*100).toFixed(2)} cm from back wall</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        The probe is placed λg/4 from the back wall to position it at the maximum E-field of the standing wave pattern inside the waveguide.
-                        Distance to rim: ${(l_cm - r.probePosition*100).toFixed(2)} cm
-                    </div>
-                </div>
-            `;
+            const guideWavelength = LAMBDA / Math.sqrt(denominator);
+            if (!isFinite(guideWavelength) || guideWavelength <= 0) {
+                throw new Error('Guide wavelength calculation error');
+            }
 
-            // Step 6: Performance Estimates
-            html += `
-                <div class="calc-step">
-                    <div class="calc-step-title">Step 6: Performance Estimates</div>
-                    <div class="calc-formula">Aperture Area = π × (D/2)² = ${(Math.PI * Math.pow(r.diameter/2, 2)).toFixed(6)} m²</div>
-                    <div class="calc-formula">Estimated Gain ≈ ${r.gain.toFixed(1)} dBi (based on aperture efficiency ≈ 60%)</div>
-                    <div class="calc-formula">Estimated VSWR ≈ ${r.vswr.toFixed(1)}:1 (L/D ratio = ${(r.length/r.diameter).toFixed(2)})</div>
-                    <div class="calc-formula">Estimated Beamwidth ≈ ${r.beamwidth}° (70λ/D approximation)</div>
-                    <div class="calc-result">Performance: Gain=${r.gain.toFixed(1)}dBi, VSWR=${r.vswr.toFixed(1)}:1, BW=${r.beamwidth}°</div>
-                    <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
-                        These are theoretical estimates. Actual performance depends on construction quality, connector matching, and alignment.
-                    </div>
-                </div>
-            `;
+            // Probe length: unified empirical formula
+            const probeLengthIdeal = LAMBDA / 4; // m
+            let correctionFactor = 0.97 - Math.log(diameterCm / 7.33) * 0.12;
 
-            calculationsContent.innerHTML = html;
-            calculationsCard.classList.remove('hidden');
-        }
+            if (!isFinite(correctionFactor)) {
+                correctionFactor = 0.95;
+            }
 
-        // ==================== UI HELPERS ====================
+            // Clamp between 0.85 and 0.97
+            correctionFactor = Math.max(0.85, Math.min(0.97, correctionFactor));
 
-        function showMessage(element, type, message) {
-            element.innerHTML = message;
-            element.className = 'message show ' + type;
-        }
+            const probeLength = probeLengthIdeal * correctionFactor; // m
 
-        function hideMessage(element) {
-            element.className = 'message';
-        }
+            // Probe position: λg/4
+            const probePosition = guideWavelength / 4; // m
 
-        function resetForm() {
-            diameterInput.value = '';
-            lengthInput.value = '';
-            diameterInput.classList.remove('invalid', 'warning');
-            lengthInput.classList.remove('invalid', 'warning');
-            hideMessage(validationMessage);
+            // Check minimal can length (20% margin beyond probe position)
+            const minLength = probePosition * 1.2;
+            if (length < minLength) {
+                showMessage(
+                    validationMessage,
+                    'error',
+                    `Can too short. Minimum length for this diameter: ${(minLength * 100).toFixed(1)} cm.`
+                );
+                lengthInput.classList.add('invalid');
+                clearResults();
+                return;
+            }
+
+            // Performance estimates
+            const gain = estimateGain(diameter, length);
+            const vswr = estimateVSWR(diameter, length);
+            const beamwidth = estimateBeamwidth(diameter);
+
+            // Store results for display & drawings
+            currentResults = {
+                wavelength: LAMBDA,
+                cutoffFreq: fc,
+                guideWavelength: guideWavelength,
+                probeLength: probeLength,
+                probePosition: probePosition,
+                correctionFactor: correctionFactor,
+                gain: gain,
+                vswr: vswr,
+                beamwidth: beamwidth,
+                diameter: diameter,
+                length: length
+            };
+
+            displayResults();
+            generateWarnings();
+            showCalculations();
+            drawSimulation();
+        } catch (err) {
+            console.error('Calculation error:', err);
+            showMessage(validationMessage, 'error', 'Calculation error. Please check your inputs.');
             clearResults();
-            calculateBtn.disabled = true;
+        }
+    }
+
+    function estimateGain(diameter, length) {
+        // Simplified aperture gain estimate (dBi)
+        const aperture = Math.PI * Math.pow(diameter / 2, 2);
+        const efficiency = 0.6;
+        const gainLinear = (4 * Math.PI * aperture * efficiency) / Math.pow(LAMBDA, 2);
+        const gain = 10 * Math.log10(gainLinear);
+        return Math.max(3, Math.min(15, gain));
+    }
+
+    function estimateVSWR(diameter, length) {
+        const idealRatio = length / diameter;
+        let vswr = 2.0;
+
+        if (idealRatio > 3 && idealRatio < 6) {
+            vswr = 1.5;
+        } else if (idealRatio >= 6) {
+            vswr = 1.3;
         }
 
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            darkModeIcon.textContent = isDarkMode ? '☀️' : '🌙';
-            if (currentResults) drawSimulation();
+        return vswr;
+    }
+
+    function estimateBeamwidth(diameter) {
+        let beamwidth = 70 * (LAMBDA / diameter);
+        beamwidth = Math.max(30, Math.min(90, beamwidth));
+        return Math.round(beamwidth);
+    }
+
+    // ========= DISPLAY =========
+    function displayResults() {
+        if (!currentResults) return;
+        const r = currentResults;
+
+        document.getElementById('wavelength').textContent =
+            (r.wavelength * 100).toFixed(2) + ' cm';
+        document.getElementById('cutoffFreq').textContent =
+            (r.cutoffFreq / 1e9).toFixed(2) + ' GHz';
+        document.getElementById('guideWavelength').textContent =
+            (r.guideWavelength * 100).toFixed(2) + ' cm';
+        document.getElementById('wireLength').textContent =
+            (r.probeLength * 100).toFixed(2) + ' cm';
+        document.getElementById('wireOffset').textContent =
+            (r.probePosition * 100).toFixed(2) + ' cm';
+        document.getElementById('estGain').textContent =
+            r.gain.toFixed(1) + ' dBi';
+        document.getElementById('estVSWR').textContent =
+            r.vswr.toFixed(1) + ':1';
+        document.getElementById('beamwidth').textContent =
+            r.beamwidth + '°';
+
+        resultsCard.classList.remove('hidden');
+        visualCard.classList.remove('hidden');
+    }
+
+    function generateWarnings() {
+        if (!currentResults) return;
+        const r = currentResults;
+        const warnings = [];
+
+        const lengthRatio = r.length / r.diameter;
+        const lengthCm = r.length * 100;
+        const diameterCm = r.diameter * 100;
+
+        // L/D warnings
+        if (lengthRatio < 1.5) {
+            warnings.push('⚠️ <strong>Very short can</strong> (L/D < 1.5): Gain will be severely limited (~3–5 dBi).');
+        } else if (lengthRatio < 2.5) {
+            warnings.push('⚠️ <strong>Short can</strong> (L/D < 2.5): Moderate gain expected (~5–7 dBi).');
+        } else if (lengthRatio > 8) {
+            warnings.push('⚠️ <strong>Very long can</strong> (L/D > 8): Diminishing returns and higher ohmic losses.');
+        } else if (lengthRatio > 6) {
+            warnings.push('💡 <strong>Long can</strong> (L/D > 6): Good gain, but construction quality and losses become important.');
         }
 
-        // ==================== INIT ====================
+        // Absolute length warnings
+        if (lengthCm < 10) {
+            warnings.push('⚠️ <strong>Length &lt; 10 cm</strong>: Minimum viable design. Longer can will improve performance.');
+        } else if (lengthCm > 40) {
+            warnings.push('⚠️ <strong>Length &gt; 40 cm</strong>: Check rigidity and minimize feedline losses.');
+        }
 
-        diameterInput.addEventListener('input', validateInputs);
-        lengthInput.addEventListener('input', validateInputs);
-        calculateBtn.addEventListener('click', calculateDesign);
-        resetBtn.addEventListener('click', resetForm);
-        darkModeToggle.addEventListener('click', toggleDarkMode);
+        // Diameter warnings
+        if (diameterCm > 13) {
+            warnings.push('⚠️ <strong>Large diameter</strong> (D &gt; 13 cm): Higher-order modes (TE₂₁, TM₀₁) may distort pattern.');
+        } else if (diameterCm < 8) {
+            warnings.push('💡 <strong>Small diameter</strong> (D &lt; 8 cm): Close to cutoff – good TE₁₁ purity, narrower bandwidth.');
+        }
 
-        // Initial state
+        // Cutoff margin
+        const fcMargin = (F - r.cutoffFreq) / F;
+        if (fcMargin < 0.15) {
+            warnings.push('⚠️ <strong>Low cutoff margin</strong>: fc/f &gt; 0.85. Risk of high loss. Consider larger diameter.');
+        } else if (fcMargin < 0.25) {
+            warnings.push('💡 <strong>Moderate cutoff margin</strong>: fc/f &gt; 0.75. Acceptable, but larger D improves margin.');
+        }
+
+        // VSWR
+        if (r.vswr > 2.5) {
+            warnings.push('⚠️ <strong>High VSWR</strong> (&gt; 2.5:1): Poor matching expected. Probe tuning may be needed.');
+        } else if (r.vswr > 2.0) {
+            warnings.push('💡 <strong>Moderate VSWR</strong> (2.0–2.5:1): Acceptable. Fine-tune probe length/position if possible.');
+        }
+
+        // Gain
+        if (r.gain < 8) {
+            warnings.push('💡 <strong>Low gain</strong> (&lt; 8 dBi): Consider lengthening the can for better directivity.');
+        } else if (r.gain > 12) {
+            warnings.push('✓ <strong>High gain</strong> (&gt; 12 dBi): Excellent directivity and narrow beamwidth expected.');
+        }
+
+        // “Optimal” region heuristic
+        if (
+            lengthRatio >= 3 && lengthRatio <= 6 &&
+            diameterCm >= 8.5 && diameterCm <= 12 &&
+            fcMargin >= 0.25
+        ) {
+            warnings.push('✅ <strong>Optimal design</strong>: All key parameters are within ideal ranges for a strong 2.4 GHz cantenna.');
+        }
+
+        if (warnings.length > 0) {
+            const hasPositive = warnings.some(w => w.includes('✓') || w.includes('✅'));
+            showMessage(
+                designMessage,
+                hasPositive ? 'info' : 'warning',
+                warnings.join('<br><br>')
+            );
+        } else {
+            showMessage(designMessage, 'info', '✓ Design parameters are acceptable.');
+        }
+    }
+
+    function clearResults() {
+        currentResults = null;
+        resultsCard.classList.add('hidden');
+        visualCard.classList.add('hidden');
+        calculationsCard.classList.add('hidden');
+        hideMessage(designMessage);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // ========= SIMULATION DRAWING =========
+    function drawSimulation() {
+        if (!currentResults) return;
+        const r = currentResults;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const scale = Math.min(
+            500 / (r.length * 100),
+            250 / (r.diameter * 100)
+        );
+
+        const canWidth = r.length * 100 * scale;
+        const canHeight = r.diameter * 100 * scale;
+        const canX = 150;
+        const canY = canvas.height / 2;
+
+        // Can body gradient
+        const gradient = ctx.createLinearGradient(
+            canX,
+            canY - canHeight / 2,
+            canX,
+            canY + canHeight / 2
+        );
+        gradient.addColorStop(0, isDarkMode ? '#7a5c3f' : '#A0522D');
+        gradient.addColorStop(0.5, isDarkMode ? '#654321' : '#8B4513');
+        gradient.addColorStop(1, isDarkMode ? '#543210' : '#654321');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(canX, canY - canHeight / 2, canWidth, canHeight);
+
+        // Can outline
+        ctx.strokeStyle = isDarkMode ? '#8B6F47' : '#654321';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(canX, canY - canHeight / 2, canWidth, canHeight);
+
+        // Back wall
+        ctx.fillStyle = isDarkMode ? '#3a2817' : '#543210';
+        ctx.fillRect(canX, canY - canHeight / 2, 6, canHeight);
+
+        // Open rim
+        ctx.strokeStyle = isDarkMode ? '#666' : '#999';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(canX + canWidth, canY - canHeight / 2);
+        ctx.lineTo(canX + canWidth, canY + canHeight / 2);
+        ctx.stroke();
+
+        // Probe position
+        const probeX = canX + (r.probePosition * 100 * scale);
+        const probeHeight = Math.min(
+            r.probeLength * 100 * scale,
+            canHeight * 0.8
+        );
+
+        // Connector
+        const connectorSize = Math.min(canHeight * 0.2, 25);
+        ctx.fillStyle = isDarkMode ? '#A0A0A0' : '#C0C0C0';
+        ctx.fillRect(
+            probeX - connectorSize / 2,
+            canY + canHeight / 2 - 2,
+            connectorSize,
+            connectorSize * 1.2
+        );
+        ctx.strokeStyle = isDarkMode ? '#707070' : '#888';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+            probeX - connectorSize / 2,
+            canY + canHeight / 2 - 2,
+            connectorSize,
+            connectorSize * 1.2
+        );
+
+        // Probe (copper wire) with glow
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#FFD700';
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(probeX, canY + canHeight / 2);
+        ctx.lineTo(probeX, canY + canHeight / 2 - probeHeight);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Probe tip
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(
+            probeX,
+            canY + canHeight / 2 - probeHeight,
+            4,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        const textColor = isDarkMode ? '#e0e0e0' : '#333';
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px Arial';
+
+        // Dimensions
+        drawDimensionLine(
+            ctx,
+            canX,
+            canY - canHeight / 2 - 30,
+            canX + canWidth,
+            canY - canHeight / 2 - 30,
+            `Length: ${(r.length * 100).toFixed(1)} cm`,
+            textColor
+        );
+
+        drawDimensionLine(
+            ctx,
+            canX + canWidth + 20,
+            canY - canHeight / 2,
+            canX + canWidth + 20,
+            canY + canHeight / 2,
+            `D: ${(r.diameter * 100).toFixed(1)} cm`,
+            textColor,
+            true
+        );
+
+        drawDimensionLine(
+            ctx,
+            canX,
+            canY + canHeight / 2 + 20,
+            probeX,
+            canY + canHeight / 2 + 20,
+            `Position: ${(r.probePosition * 100).toFixed(1)} cm`,
+            textColor
+        );
+
+        const probeLabelX = probeX - 60;
+        drawDimensionLine(
+            ctx,
+            probeLabelX,
+            canY + canHeight / 2,
+            probeLabelX,
+            canY + canHeight / 2 - probeHeight,
+            `Probe: ${(r.probeLength * 100).toFixed(1)} cm`,
+            textColor,
+            true
+        );
+
+        // λg indicator
+        const gwX1 = canX + 10;
+        const gwX2 = canX + 10 + (r.guideWavelength * 100 * scale);
+        ctx.strokeStyle = isDarkMode ? '#4cc9f0' : '#4361ee';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(gwX1, canY - canHeight / 4);
+        ctx.lineTo(Math.min(gwX2, canX + canWidth - 10), canY - canHeight / 4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = isDarkMode ? '#4cc9f0' : '#4361ee';
+        ctx.font = '11px Arial';
+        ctx.fillText(
+            `λg = ${(r.guideWavelength * 100).toFixed(1)} cm`,
+            gwX1,
+            canY - canHeight / 4 - 5
+        );
+
+        // Labels
+        ctx.fillStyle = textColor;
+        ctx.font = '12px Arial';
+        ctx.fillText('Back Wall', canX + 10, canY - canHeight / 2 + 15);
+        ctx.fillText('Open Rim', canX + canWidth - 60, canY - canHeight / 2 + 15);
+        ctx.fillText('N-Type', probeX - 20, canY + canHeight / 2 + connectorSize * 1.5);
+
+        // Cutoff status
+        const fcStatus = `fc = ${(r.cutoffFreq / 1e9).toFixed(2)} GHz`;
+        ctx.fillStyle =
+            r.cutoffFreq < F * 0.8
+                ? (isDarkMode ? '#2ecc71' : '#27ae60')
+                : (isDarkMode ? '#f39c12' : '#e67e22');
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText(
+            fcStatus + ' < 2.4 GHz ✓',
+            canX + canWidth - 160,
+            canY + canHeight / 2 + 50
+        );
+    }
+
+    function drawDimensionLine(ctx, x1, y1, x2, y2, label, color, isVertical = false) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        const capLength = 8;
+
+        if (isVertical) {
+            ctx.beginPath();
+            ctx.moveTo(x1 - capLength / 2, y1);
+            ctx.lineTo(x1 + capLength / 2, y1);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2 - capLength / 2, y2);
+            ctx.lineTo(x2 + capLength / 2, y2);
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1 - capLength / 2);
+            ctx.lineTo(x1, y1 + capLength / 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2 - capLength / 2);
+            ctx.lineTo(x2, y2 + capLength / 2);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = color;
+        ctx.font = '11px Arial';
+        const textWidth = ctx.measureText(label).width;
+        const textX = (x1 + x2) / 2 - textWidth / 2;
+        const textY = isVertical ? (y1 + y2) / 2 : y1 - 8;
+
+        ctx.fillStyle = isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.9)';
+        ctx.fillRect(textX - 3, textY - 11, textWidth + 6, 14);
+
+        ctx.fillStyle = color;
+        ctx.fillText(label, textX, textY);
+    }
+
+    // ========= CALCULATION STEPS (TEXT) =========
+    function showCalculations() {
+        if (!currentResults) return;
+        const r = currentResults;
+
+        const d_cm = r.diameter * 100;
+        const l_cm = r.length * 100;
+
+        let html = '';
+
+        // Step 1: λ
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 1: Free-Space Wavelength (λ)</div>
+                <div class="calc-formula">λ = c / f</div>
+                <div class="calc-formula">λ = (3 × 10⁸ m/s) / (2.4 × 10⁹ Hz)</div>
+                <div class="calc-formula">λ = ${r.wavelength.toFixed(6)} m = ${(r.wavelength * 100).toFixed(2)} cm</div>
+                <div class="calc-result">Result: Wavelength = ${(r.wavelength * 100).toFixed(2)} cm</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    This is the free-space wavelength at 2.4 GHz. The probe is approximately a quarter-wave inside the waveguide, slightly shortened.
+                </div>
+            </div>
+        `;
+
+        // Step 2: fc
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 2: Cutoff Frequency (fc)</div>
+                <div class="calc-formula">fc = (1.8412 × c) / (π × D)</div>
+                <div class="calc-formula">fc = (1.8412 × 3 × 10⁸) / (π × ${r.diameter.toFixed(4)})</div>
+                <div class="calc-formula">fc = ${(1.8412 * C).toExponential(3)} / ${(Math.PI * r.diameter).toFixed(4)}</div>
+                <div class="calc-formula">fc = ${r.cutoffFreq.toExponential(3)} Hz = ${(r.cutoffFreq / 1e9).toFixed(3)} GHz</div>
+                <div class="calc-result">Result: Cutoff Frequency = ${(r.cutoffFreq / 1e9).toFixed(3)} GHz</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    This is the minimum TE₁₁ propagation frequency. It must be below 2.4 GHz.
+                    Ratio fc/f = ${(r.cutoffFreq / F).toFixed(3)}.
+                </div>
+            </div>
+        `;
+
+        // Step 3: λg
+        const ratio = r.cutoffFreq / F;
+        const denominator = 1 - Math.pow(ratio, 2);
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 3: Guide Wavelength (λg)</div>
+                <div class="calc-formula">λg = λ / √(1 − (fc/f)²)</div>
+                <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(1 − (${ratio.toFixed(4)})²)</div>
+                <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(1 − ${Math.pow(ratio, 2).toFixed(6)})</div>
+                <div class="calc-formula">λg = ${r.wavelength.toFixed(6)} / √(${denominator.toFixed(6)})</div>
+                <div class="calc-formula">λg = ${r.guideWavelength.toFixed(6)} m = ${(r.guideWavelength * 100).toFixed(2)} cm</div>
+                <div class="calc-result">Result: Guide Wavelength = ${(r.guideWavelength * 100).toFixed(2)} cm</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    The guide wavelength is longer than λ because the phase velocity in the waveguide is reduced.
+                    Ratio λg/λ = ${(r.guideWavelength / r.wavelength).toFixed(3)}.
+                </div>
+            </div>
+        `;
+
+        // Step 4: Probe length (unified empirical model)
+        const probeLengthIdeal = LAMBDA / 4;
+        const cf = r.correctionFactor;
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 4: Probe Length (Quarter-Wave Monopole)</div>
+                <div class="calc-formula">Lp_ideal = λ / 4 = ${probeLengthIdeal.toFixed(6)} m = ${(probeLengthIdeal * 100).toFixed(2)} cm</div>
+                <div class="calc-formula">k(D) = 0.97 − 0.12·ln(D_cm / 7.33)</div>
+                <div class="calc-formula">D_cm = ${d_cm.toFixed(2)} cm → ln(D_cm / 7.33) = ${Math.log(d_cm / 7.33).toFixed(4)}</div>
+                <div class="calc-formula">k(D) (before clamp) = ${(
+                    0.97 - 0.12 * Math.log(d_cm / 7.33)
+                ).toFixed(4)}</div>
+                <div class="calc-formula">k(D) (after clamp[0.85,0.97]) = ${cf.toFixed(4)}</div>
+                <div class="calc-formula">Lp_actual = Lp_ideal × k(D) = ${probeLengthIdeal.toFixed(6)} × ${cf.toFixed(4)}</div>
+                <div class="calc-formula">Lp_actual = ${r.probeLength.toFixed(6)} m = ${(r.probeLength * 100).toFixed(2)} cm</div>
+                <div class="calc-result">Result: Probe Length = ${(r.probeLength * 100).toFixed(2)} cm</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    The probe behaves like a quarter-wave monopole inside the can.
+                    Larger diameters increase capacitive loading and slightly shorten the optimal probe length.
+                    Here the probe is ${(cf * 100).toFixed(1)}% of ideal λ/4.
+                </div>
+            </div>
+        `;
+
+        // Step 5: Probe position
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 5: Probe Position from Back Wall</div>
+                <div class="calc-formula">Dp = λg / 4</div>
+                <div class="calc-formula">Dp = ${r.guideWavelength.toFixed(6)} / 4</div>
+                <div class="calc-formula">Dp = ${r.probePosition.toFixed(6)} m = ${(r.probePosition * 100).toFixed(2)} cm</div>
+                <div class="calc-result">Result: Probe Position = ${(r.probePosition * 100).toFixed(2)} cm from back wall</div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    The probe is placed at a λg/4 standing-wave maximum.
+                    Distance from probe to open rim: ${(l_cm - r.probePosition * 100).toFixed(2)} cm.
+                </div>
+            </div>
+        `;
+
+        // Step 6: Performance estimates
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Step 6: Performance Estimates</div>
+                <div class="calc-formula">Aperture Area = π × (D/2)² = ${(Math.PI * Math.pow(r.diameter / 2, 2)).toFixed(6)} m²</div>
+                <div class="calc-formula">Estimated Gain ≈ ${r.gain.toFixed(1)} dBi</div>
+                <div class="calc-formula">Estimated VSWR ≈ ${r.vswr.toFixed(1)}:1 (L/D = ${(r.length / r.diameter).toFixed(2)})</div>
+                <div class="calc-formula">Estimated Beamwidth ≈ ${r.beamwidth}° (≈ 70·λ/D)</div>
+                <div class="calc-result">
+                    Performance: Gain ≈ ${r.gain.toFixed(1)} dBi,
+                    VSWR ≈ ${r.vswr.toFixed(1)}:1,
+                    Beamwidth ≈ ${r.beamwidth}°.
+                </div>
+                <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
+                    These are theoretical estimates. Real performance depends on construction quality, connector matching, and tuning.
+                </div>
+            </div>
+        `;
+
+        calculationsContent.innerHTML = html;
+        calculationsCard.classList.remove('hidden');
+    }
+
+    // ========= UI HELPERS =========
+    function showMessage(element, type, message) {
+        element.innerHTML = message;
+        element.className = 'message show ' + type;
+    }
+
+    function hideMessage(element) {
+        element.className = 'message';
+        element.innerHTML = '';
+    }
+
+    function resetForm() {
+        diameterInput.value = '';
+        lengthInput.value = '';
+        diameterInput.classList.remove('invalid', 'warning');
+        lengthInput.classList.remove('invalid', 'warning');
+        hideMessage(validationMessage);
+        clearResults();
         calculateBtn.disabled = true;
-    </script>
+    }
+
+    function toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        darkModeIcon.textContent = isDarkMode ? '☀️' : '🌙';
+        if (currentResults) {
+            drawSimulation();
+        }
+    }
+
+    // ========= EVENT BINDINGS =========
+    diameterInput.addEventListener('input', validateInputs);
+    lengthInput.addEventListener('input', validateInputs);
+    calculateBtn.addEventListener('click', calculateDesign);
+    resetBtn.addEventListener('click', resetForm);
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+    // Initial state
+    calculateBtn.disabled = true;
+</script>
 </body>
 </html>
