@@ -1,1130 +1,1172 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2.4 GHz Wi-Fi Cantenna Designer</title>
-    <style>
-        :root {
-            --bg-color: #f8f9fa;
-            --text-color: #343a40;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --primary-color: #4361ee;
-            --secondary-color: #3a0ca3;
-            --accent-color: #4cc9f0;
-            --error-color: #e63946;
-            --success-color: #2a9d8f;
-            --warning-color: #f4a261;
-            --input-bg: #ffffff;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
-            --gradient: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
-        }
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>2.4 GHz Wi-Fi Cantenna Designer</title>  
+    <style>  
+        :root {  
+            --bg-color: #f8f9fa;  
+            --text-color: #343a40;  
+            --card-bg: #ffffff;  
+            --border-color: #dee2e6;  
+            --primary-color: #4361ee;  
+            --secondary-color: #3a0ca3;  
+            --accent-color: #4cc9f0;  
+            --error-color: #e63946;  
+            --success-color: #2a9d8f;  
+            --warning-color: #f4a261;  
+            --input-bg: #ffffff;  
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);  
+            --gradient: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);  
+        }  
+        
+        .dark-mode {  
+            --bg-color: #121212;  
+            --text-color: #e9ecef;  
+            --card-bg: #1e1e1e;  
+            --border-color: #333;  
+            --primary-color: #4cc9f0;  
+            --secondary-color: #4361ee;  
+            --accent-color: #3a0ca3;  
+            --error-color: #e63946;  
+            --success-color: #2a9d8f;  
+            --warning-color: #f4a261;  
+            --input-bg: #2d2d2d;  
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);  
+            --gradient: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);  
+        }  
 
-        .dark-mode {
-            --bg-color: #121212;
-            --text-color: #e9ecef;
-            --card-bg: #1e1e1e;
-            --border-color: #333;
-            --primary-color: #4cc9f0;
-            --secondary-color: #4361ee;
-            --accent-color: #3a0ca3;
-            --error-color: #e63946;
-            --success-color: #2a9d8f;
-            --warning-color: #f4a261;
-            --input-bg: #2d2d2d;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --gradient: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
-        }
+        * {  
+            box-sizing: border-box;  
+            margin: 0;  
+            padding: 0;  
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;  
+        }  
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s, transform 0.2s;
-        }
+        body {  
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+            background-color: var(--bg-color);  
+            color: var(--text-color);  
+            line-height: 1.6;  
+            padding: 20px;  
+            background-image: radial-gradient(circle at 15% 50%, rgba(76, 201, 240, 0.05) 0%, transparent 55%), radial-gradient(circle at 85% 30%, rgba(67, 97, 238, 0.05) 0%, transparent 55%);  
+        }  
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            background-image: radial-gradient(circle at 15% 50%, rgba(76, 201, 240, 0.05) 0%, transparent 55%), radial-gradient(circle at 85% 30%, rgba(67, 97, 238, 0.05) 0%, transparent 55%);
-        }
+        .container {  
+            max-width: 1200px;  
+            margin: 0 auto;  
+        }  
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        header {  
+            text-align: center;  
+            margin-bottom: 30px;  
+            padding: 30px;  
+            background: var(--gradient);  
+            border-radius: 12px;  
+            box-shadow: var(--shadow);  
+            color: white;  
+            position: relative;  
+            overflow: hidden;  
+        }  
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: var(--gradient);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
+        header::before {  
+            content: '';  
+            position: absolute;  
+            top: 0;  
+            left: 0;  
+            right: 0;  
+            bottom: 0;  
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");  
+            opacity: 0.3;  
+        }  
 
-        header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.3;
-        }
+        h1 {  
+            margin-bottom: 10px;  
+            font-size: 2.5rem;  
+            position: relative;  
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);  
+        }  
 
-        h1 {
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-            position: relative;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
+        .subtitle {  
+            font-size: 1.1rem;  
+            opacity: 0.9;  
+            max-width: 600px;  
+            margin: 0 auto;  
+            position: relative;  
+        }  
 
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-        }
+        .card {  
+            background-color: var(--card-bg);  
+            border-radius: 12px;  
+            padding: 25px;  
+            margin-bottom: 25px;  
+            box-shadow: var(--shadow);  
+            border: 1px solid var(--border-color);  
+            transition: transform 0.3s, box-shadow 0.3s;  
+        }  
 
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+        .card:hover {  
+            transform: translateY(-5px);  
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);  
+        }  
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
+        .card h2 {  
+            color: var(--primary-color);  
+            margin-bottom: 20px;  
+            padding-bottom: 10px;  
+            border-bottom: 2px solid var(--border-color);  
+            display: flex;  
+            align-items: center;  
+        }  
 
-        .card h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-        }
+        .card h2::before {  
+            content: '';  
+            display: inline-block;  
+            width: 8px;  
+            height: 24px;  
+            background: var(--gradient);  
+            margin-right: 12px;  
+            border-radius: 4px;  
+        }  
 
-        .card h2::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 24px;
-            background: var(--gradient);
-            margin-right: 12px;
-            border-radius: 4px;
-        }
+        .input-group {  
+            margin-bottom: 20px;  
+        }  
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+        label {  
+            display: block;  
+            margin-bottom: 8px;  
+            font-weight: 600;  
+            color: var(--text-color);  
+        }  
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
+        input {  
+            width: 100%;  
+            padding: 12px 15px;  
+            border: 2px solid var(--border-color);  
+            border-radius: 8px;  
+            background-color: var(--input-bg);  
+            color: var(--text-color);  
+            font-size: 1rem;  
+            transition: border-color 0.3s, box-shadow 0.3s;  
+        }  
+          
+        input.invalid {  
+            border-color: var(--error-color);  
         }
         
-        /* Style for invalid inputs */
-        input:invalid:not(:placeholder-shown) {
-             border-color: var(--warning-color);
+        input.warning {
+            border-color: var(--warning-color);
         }
 
-        input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
+        input:focus {  
+            outline: none;  
+            border-color: var(--primary-color);  
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);  
+        }  
 
-        input:read-only {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            opacity: 0.8;
+        input:read-only {  
+            background-color: var(--bg-color);  
+            color: var(--text-color);  
+            opacity: 0.8;  
+            cursor: not-allowed;  
+        }  
+
+        .dimension-range {  
+            font-size: 0.85rem;  
+            color: var(--text-color);  
+            opacity: 0.7;  
+            margin-top: 8px;  
+            padding-left: 5px;  
+        }  
+
+        .button-group {  
+            display: flex;  
+            gap: 15px;  
+            margin-top: 25px;  
+        }  
+
+        button {  
+            padding: 12px 24px;  
+            border: none;  
+            border-radius: 8px;  
+            cursor: pointer;  
+            font-weight: 600;  
+            font-size: 1rem;  
+            transition: all 0.3s;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            gap: 8px;  
+        }  
+
+        button:hover:not(:disabled) {  
+            transform: translateY(-2px);  
+        }  
+
+        button:active:not(:disabled) {  
+            transform: translateY(0);  
+        }
+        
+        button:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .dimension-range {
-            font-size: 0.85rem;
-            color: var(--text-color);
-            opacity: 0.7;
-            margin-top: 8px;
-            padding-left: 5px;
-        }
+        .primary-btn {  
+            background: var(--gradient);  
+            color: white;  
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);  
+        }  
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
+        .primary-btn:hover:not(:disabled) {  
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);  
+        }  
 
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+        .secondary-btn {  
+            background-color: var(--border-color);  
+            color: var(--text-color);  
+        }  
 
-        button:hover {
-            transform: translateY(-2px);
-        }
+        .secondary-btn:hover {  
+            background-color: #adb5bd;  
+        }  
 
-        button:active {
-            transform: translateY(0);
-        }
+        .error-message {  
+            color: var(--error-color);  
+            margin-top: 15px;  
+            font-size: 0.95rem;  
+            padding: 12px 15px;  
+            background-color: rgba(230, 57, 70, 0.1);  
+            border-radius: 8px;  
+            border-left: 4px solid var(--error-color);  
+            display: none;  
+        }  
+          
+        .error-message.warning {  
+            color: var(--warning-color);  
+            background-color: rgba(244, 162, 97, 0.1);  
+            border-left-color: var(--warning-color);  
+        }  
 
-        .primary-btn {
-            background: var(--gradient);
-            color: white;
-            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
-        }
+        .error-message.show {  
+            display: block;  
+            animation: fadeIn 0.3s ease-in-out;  
+        }  
 
-        .primary-btn:hover {
-            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
-        }
+        @keyframes fadeIn {  
+            from { opacity: 0; transform: translateY(-10px); }  
+            to { opacity: 1; transform: translateY(0); }  
+        }  
 
-        .secondary-btn {
-            background-color: var(--border-color);
-            color: var(--text-color);
-        }
+        .results {  
+            display: grid;  
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  
+            gap: 20px;  
+            margin-top: 20px;  
+        }  
 
-        .secondary-btn:hover {
-            background-color: #adb5bd;
-        }
+        .result-item {  
+            background-color: var(--bg-color);  
+            padding: 20px;  
+            border-radius: 10px;  
+            text-align: center;  
+            transition: transform 0.2s, box-shadow 0.2s;  
+            border: 1px solid var(--border-color);  
+            position: relative;  
+            overflow: hidden;  
+        }  
 
-        .error-message {
-            color: var(--error-color);
-            margin-top: 15px;
-            font-size: 0.95rem;
-            padding: 12px 15px;
-            background-color: rgba(230, 57, 70, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid var(--error-color);
-            display: none;
-        }
-        
-        /* Different style for live warnings */
-        .error-message.warning {
-            color: var(--warning-color);
-            background-color: rgba(244, 162, 97, 0.1);
-            border-left-color: var(--warning-color);
-        }
+        .result-item::before {  
+            content: '';  
+            position: absolute;  
+            top: 0;  
+            left: 0;  
+            width: 100%;  
+            height: 4px;  
+            background: var(--gradient);  
+        }  
 
-        .error-message.show {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        .result-item:hover {  
+            transform: translateY(-5px);  
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);  
+        }  
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .result-label {  
+            font-size: 0.9rem;  
+            opacity: 0.8;  
+            margin-bottom: 8px;  
+        }  
 
-        .results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
+        .result-value {  
+            font-size: 1.4rem;  
+            font-weight: 700;  
+            margin-top: 5px;  
+            color: var(--primary-color);  
+        }  
 
-        .result-item {
-            background-color: var(--bg-color);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
+        .simulation-container {  
+            display: flex;  
+            flex-direction: column;  
+            align-items: center;  
+            margin-top: 20px;  
+        }  
 
-        .result-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--gradient);
-        }
+        #simulationCanvas {  
+            border: 1px solid var(--border-color);  
+            border-radius: 8px;  
+            background-color: var(--card-bg);  
+            margin-bottom: 20px;  
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);  
+        }  
 
-        .result-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-        }
+        .simulation-legend {  
+            display: flex;  
+            flex-wrap: wrap;  
+            gap: 20px;  
+            justify-content: center;  
+            background: var(--bg-color);  
+            padding: 15px;  
+            border-radius: 8px;  
+            border: 1px solid var(--border-color);  
+        }  
 
-        .result-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 8px;
-        }
+        .legend-item {  
+            display: flex;  
+            align-items: center;  
+            gap: 8px;  
+        }  
 
-        .result-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-top: 5px;
-            color: var(--primary-color);
-        }
+        .legend-color {  
+            width: 18px;  
+            height: 18px;  
+            border-radius: 4px;  
+        }  
 
-        .simulation-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
+        .calculation-steps {  
+            margin-top: 30px;  
+        }  
 
-        #simulationCanvas {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--card-bg);
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+        .calculation-step {  
+            margin-bottom: 20px;  
+            padding: 20px;  
+            background-color: var(--bg-color);  
+            border-radius: 10px;  
+            border-left: 4px solid var(--primary-color);  
+            transition: transform 0.2s;  
+        }  
 
-        .simulation-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            background: var(--bg-color);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
+        .calculation-step:hover {  
+            transform: translateX(5px);  
+        }  
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .step-title {  
+            font-weight: 600;  
+            margin-bottom: 12px;  
+            color: var(--primary-color);  
+            display: flex;  
+            align-items: center;  
+        }  
 
-        .legend-color {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-        }
+        .step-title::before {  
+            content: '';  
+            display: inline-block;  
+            width: 24px;  
+            height: 24px;  
+            background: var(--gradient);  
+            border-radius: 50%;  
+            margin-right: 10px;  
+            color: white;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            font-size: 0.8rem;  
+            font-weight: bold;  
+        }  
 
-        .calculation-steps {
-            margin-top: 30px;
-        }
+        .calculation-step:nth-child(1) .step-title::before { content: '1'; }  
+        .calculation-step:nth-child(2) .step-title::before { content: '2'; }  
+        .calculation-step:nth-child(3) .step-title::before { content: '3'; }  
+        .calculation-step:nth-child(4) .step-title::before { content: '4'; }  
+        .calculation-step:nth-child(5) .step-title::before { content: '5'; }  
+        .calculation-step:nth-child(6) .step-title::before { content: '6'; }  
 
-        .calculation-step {
-            margin-bottom: 20px;
-            padding: 20px;
-            background-color: var(--bg-color);
-            border-radius: 10px;
-            border-left: 4px solid var(--primary-color);
-            transition: transform 0.2s;
-        }
+        .step-formula {  
+            font-family: 'Courier New', monospace;  
+            font-size: 1.1rem;  
+            margin: 8px 0;  
+            padding: 12px;  
+            background-color: var(--card-bg);  
+            border-radius: 6px;  
+            border: 1px solid var(--border-color);  
+        }  
 
-        .calculation-step:hover {
-            transform: translateX(5px);
-        }
+        .step-explanation {  
+            font-size: 0.9rem;  
+            opacity: 0.8;  
+            margin-top: 8px;  
+            padding-left: 5px;  
+        }  
 
-        .step-title {
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-        }
+        .step-substitution {  
+            font-family: 'Courier New', monospace;  
+            margin: 12px 0;  
+            padding: 12px;  
+            background-color: var(--card-bg);  
+            border-radius: 6px;  
+            border-left: 3px solid var(--success-color);  
+        }  
 
-        .step-title::before {
-            content: '';
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            background: var(--gradient);
-            border-radius: 50%;
-            margin-right: 10px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
+        .step-result {  
+            font-weight: 600;  
+            margin-top: 12px;  
+            padding: 12px;  
+            background-color: var(--card-bg);  
+            border-radius: 6px;  
+            border-left: 3px solid var(--primary-color);  
+        }  
 
-        .calculation-step:nth-child(1) .step-title::before { content: '1'; }
-        .calculation-step:nth-child(2) .step-title::before { content: '2'; }
-        .calculation-step:nth-child(3) .step-title::before { content: '3'; }
-        .calculation-step:nth-child(4) .step-title::before { content: '4'; }
-        .calculation-step:nth-child(5) .step-title::before { content: '5'; }
-        .calculation-step:nth-child(6) .step-title::before { content: '6'; }
+        .formulas {  
+            margin-top: 30px;  
+        }  
 
-        .step-formula {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            margin: 8px 0;
-            padding: 12px;
-            background-color: var(--card-bg);
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-        }
+        .formula-item {  
+            margin-bottom: 15px;  
+            padding: 15px;  
+            background-color: var(--bg-color);  
+            border-radius: 8px;  
+            transition: transform 0.2s;  
+            border: 1px solid var(--border-color);  
+        }  
 
-        .step-explanation {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: 8px;
-            padding-left: 5px;
-        }
+        .formula-item:hover {  
+            transform: translateX(5px);  
+        }  
 
-        .step-substitution {
-            font-family: 'Courier New', monospace;
-            margin: 12px 0;
-            padding: 12px;
-            background-color: var(--card-bg);
-            border-radius: 6px;
-            border-left: 3px solid var(--success-color);
-        }
+        .formula {  
+            font-family: 'Courier New', monospace;  
+            font-size: 1.1rem;  
+            margin: 5px 0;  
+        }  
 
-        .step-result {
-            font-weight: 600;
-            margin-top: 12px;
-            padding: 12px;
-            background-color: var(--card-bg);
-            border-radius: 6px;
-            border-left: 3px solid var(--primary-color);
-        }
+        .explanation {  
+            font-size: 0.9rem;  
+            opacity: 0.8;  
+        }  
 
-        .formulas {
-            margin-top: 30px;
-        }
+        .dark-mode-toggle {  
+            position: fixed;  
+            top: 20px;  
+            right: 20px;  
+            background-color: var(--card-bg);  
+            border: 1px solid var(--border-color);  
+            border-radius: 50%;  
+            width: 50px;  
+            height: 50px;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            cursor: pointer;  
+            box-shadow: var(--shadow);  
+            z-index: 100;  
+            transition: transform 0.3s;  
+        }  
 
-        .formula-item {
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            transition: transform 0.2s;
-            border: 1px solid var(--border-color);
-        }
+        .dark-mode-toggle:hover {  
+            transform: rotate(30deg);  
+        }  
 
-        .formula-item:hover {
-            transform: translateX(5px);
-        }
+        .frequency-badge {  
+            display: inline-block;  
+            background: var(--gradient);  
+            color: white;  
+            padding: 5px 12px;  
+            border-radius: 20px;  
+            font-size: 0.9rem;  
+            font-weight: 600;  
+            margin-top: 10px;  
+        }  
 
-        .formula {
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-            margin: 5px 0;
-        }
-
-        .explanation {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .dark-mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            z-index: 100;
-            transition: transform 0.3s;
-        }
-
-        .dark-mode-toggle:hover {
-            transform: rotate(30deg);
-        }
-
-        .frequency-badge {
-            display: inline-block;
-            background: var(--gradient);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .button-group {
-                flex-direction: column;
-            }
-            
-            .results {
-                grid-template-columns: 1fr;
-            }
-            
-            #simulationCanvas {
-                width: 100%;
-                height: auto;
-            }
-            
-            .simulation-legend {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            header {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-        }
+        @media (max-width: 768px) {  
+            .button-group {  
+                flex-direction: column;  
+            }  
+              
+            .results {  
+                grid-template-columns: 1fr;  
+            }  
+              
+            #simulationCanvas {  
+                width: 100%;  
+                height: auto;  
+            }  
+              
+            .simulation-legend {  
+                flex-direction: column;  
+                align-items: flex-start;  
+                gap: 10px;  
+            }  
+              
+            header {  
+                padding: 20px;  
+            }  
+              
+            h1 {  
+                font-size: 2rem;  
+            }  
+        }  
     </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>2.4 GHz Wi-Fi Cantenna Designer</h1>
-            <p class="subtitle">Design and simulate a cantenna for 2.4 GHz Wi-Fi applications</p>
-            <div class="frequency-badge">Fixed Frequency: 2.4 GHz</div>
-        </header>
+</head>  
+<body>  
+    <div class="container">  
+        <header>  
+            <h1>2.4 GHz Wi-Fi Cantenna Designer</h1>  
+            <p class="subtitle">Design and simulate a cantenna for 2.4 GHz Wi-Fi applications</p>  
+            <div class="frequency-badge">Fixed Frequency: 2.4 GHz</div>  
+        </header>  
 
-        <div class="dark-mode-toggle" id="darkModeToggle">
-            <span id="darkModeIcon">🌙</span>
-        </div>
+        <div class="dark-mode-toggle" id="darkModeToggle">  
+            <span id="darkModeIcon">🌙</span>  
+        </div>  
 
-        <div class="card">
-            <h2>Can Geometry</h2>
-            <div class="input-group">
-                <label for="diameter">Diameter (D)</label>
-                <input type="number" id="diameter" min="7.3258" max="20" step="0.0001" value="0">
-                <div class="dimension-range">Required: 7.3258cm - 20cm (to allow 2.4 GHz propagation)</div>
-            </div>
+        <div class="card">  
+            <h2>Can Geometry</h2>  
+            <div class="input-group">  
+                <label for="diameter">Diameter (D)</label>  
+                <input type="number" id="diameter" min="7.3258" max="20" step="0.0001" placeholder="Enter diameter">  
+                <div class="dimension-range">Required: 7.3258cm - 20cm (to allow 2.4 GHz propagation)</div>  
+            </div>  
 
-            <div class="input-group">
-                <label for="radius">Radius (r)</label>
-                <input type="number" id="radius" min="3.6629" max="10" step="0.0001" value="0">
-                <div class="dimension-range">Required: 3.6629cm - 10cm (auto-syncs with diameter)</div>
-            </div>
+            <div class="input-group">  
+                <label for="radius">Radius (r)</label>  
+                <input type="number" id="radius" min="3.6629" max="10" step="0.0001" placeholder="Enter radius">  
+                <div class="dimension-range">Required: 3.6629cm - 10cm (auto-syncs with diameter)</div>  
+            </div>  
 
-            <div class="input-group">
-                <label for="length">Length (L)</label>
-                <input type="number" id="length" min="5" max="50" step="0.1" value="0">
-                <div class="dimension-range">Practical Range: 5cm - 50cm (Min. length depends on diameter)</div>
-            </div>
+            <div class="input-group">  
+                <label for="length">Length (L)</label>  
+                <input type="number" id="length" min="5" max="50" step="0.1" placeholder="Enter length">  
+                <div class="dimension-range">Practical Range: 5cm - 50cm (Min. length depends on diameter)</div>  
+            </div>  
 
-            <div class="error-message" id="errorMessage"></div>
+            <div class="error-message" id="errorMessage"></div>  
 
-            <div class="button-group">
-                <button id="calculateBtn" class="primary-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="M5 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm1 2a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/>
-                    </svg>
-                    Calculate
-                </button>
-                <button id="resetBtn" class="secondary-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                    </svg>
-                    Reset
-                </button>
-            </div>
-        </div>
+            <div class="button-group">  
+                <button id="calculateBtn" class="primary-btn">  
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">  
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>  
+                        <path d="M5 6.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm1 2a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/>  
+                    </svg>  
+                    Calculate  
+                </button>  
+                <button id="resetBtn" class="secondary-btn">  
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">  
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>  
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>  
+                    </svg>  
+                    Reset  
+                </button>  
+            </div>  
+        </div>  
 
-        <div class="card">
-            <h2>Calculated Parameters</h2>
-            <div class="results">
-                <div class="result-item">
-                    <div class="result-label">Wavelength (λ)</div>
-                    <div class="result-value" id="wavelength">0 cm</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Cutoff Frequency (fc)</div>
-                    <div class="result-value" id="cutoffFreq">0 GHz</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Guide Wavelength (λg)</div>
-                    <div class="result-value" id="guideWavelength">0 cm</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Copper Wire Length (Lw)</div>
-                    <div class="result-value" id="wireLength">0 cm</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Wire Offset from Back (Dback)</div>
-                    <div class="result-value" id="wireOffset">0 cm</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Wire to Rim (Drim)</div>
-                    <div class="result-value" id="wireToRim">0 cm</div>
-                </div>
-            </div>
-        </div>
+        <div class="card">  
+            <h2>Calculated Parameters</h2>  
+            <div class="results">  
+                <div class="result-item">  
+                    <div class="result-label">Wavelength (λ)</div>  
+                    <div class="result-value" id="wavelength">—</div>  
+                </div>  
+                <div class="result-item">  
+                    <div class="result-label">Cutoff Frequency (fc)</div>  
+                    <div class="result-value" id="cutoffFreq">—</div>  
+                </div>  
+                <div class="result-item">  
+                    <div class="result-label">Guide Wavelength (λg)</div>  
+                    <div class="result-value" id="guideWavelength">—</div>  
+                </div>  
+                <div class="result-item">  
+                    <div class="result-label">Copper Wire Length (Lw)</div>  
+                    <div class="result-value" id="wireLength">—</div>  
+                </div>  
+                <div class="result-item">  
+                    <div class="result-label">Wire Offset from Back (Dback)</div>  
+                    <div class="result-value" id="wireOffset">—</div>  
+                </div>  
+                <div class="result-item">  
+                    <div class="result-label">Wire to Rim (Drim)</div>  
+                    <div class="result-value" id="wireToRim">—</div>  
+                </div>  
+            </div>  
+        </div>  
 
-        <div class="card calculation-steps" id="calculationSteps" style="display: none;">
-            <h2>Calculation Steps</h2>
-            <div id="stepsContainer">
-                </div>
-        </div>
+        <div class="card calculation-steps" id="calculationSteps" style="display: none;">  
+            <h2>Calculation Steps</h2>  
+            <div id="stepsContainer"></div>  
+        </div>  
 
-        <div class="card">
-            <h2>Visual Simulation</h2>
-            <div class="simulation-container">
-                <canvas id="simulationCanvas" width="800" height="400"></canvas>
-                <div class="simulation-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #8B4513;"></div>
-                        <span>Can Body</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #FFD700;"></div>
-                        <span>Copper Wire</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #C0C0C0;"></div>
-                        <span>N-Type Connector</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #0000FF;"></div>
-                        <span>LMR400 Cable</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="card">  
+            <h2>Visual Simulation</h2>  
+            <div class="simulation-container">  
+                <canvas id="simulationCanvas" width="800" height="400"></canvas>  
+                <div class="simulation-legend">  
+                    <div class="legend-item">  
+                        <div class="legend-color" style="background-color: #8B4513;"></div>  
+                        <span>Can Body</span>  
+                    </div>  
+                    <div class="legend-item">  
+                        <div class="legend-color" style="background-color: #FFD700;"></div>  
+                        <span>Copper Wire</span>  
+                    </div>  
+                    <div class="legend-item">  
+                        <div class="legend-color" style="background-color: #C0C0C0;"></div>  
+                        <span>N-Type Connector</span>  
+                    </div>  
+                    <div class="legend-item">  
+                        <div class="legend-color" style="background-color: #0000FF;"></div>  
+                        <span>LMR400 Cable</span>  
+                    </div>  
+                </div>  
+            </div>  
+        </div>  
 
-        <div class="card formulas">
-            <h2>Formulas</h2>
-            <div class="formula-item">
-                <div class="formula">λ = c / f</div>
-                <div class="explanation">Wavelength equals speed of light divided by frequency</div>
-            </div>
-            <div class="formula-item">
-                <div class="formula">fc = (1.8412 × c) / (π × D)</div>
-                <div class="explanation">Cutoff frequency for the circular waveguide</div>
-            </div>
-            <div class="formula-item">
-                <div class="formula">λg = λ / √(1 − (fc / f)²)</div>
-                <div class="explanation">Guide wavelength inside the can</div>
-            </div>
-            <div class="formula-item">
-                <div class="formula">Lw = λ / 4</div>
-                <div class="explanation">Optimal copper wire length is quarter wavelength</div>
-            </div>
-            <div class="formula-item">
-                <div class="formula">Dback = λg / 4</div>
-                <div class="explanation">Copper wire offset from the back of the can</div>
-            </div>
-            <div class="formula-item">
-                <div class="formula">Drim = L − Dback</div>
-                <div class="explanation">Distance from copper wire to the open rim</div>
-            </div>
-        </div>
-    </div>
+        <div class="card formulas">  
+            <h2>Formulas</h2>  
+            <div class="formula-item">  
+                <div class="formula">λ = c / f</div>  
+                <div class="explanation">Wavelength equals speed of light divided by frequency</div>  
+            </div>  
+            <div class="formula-item">  
+                <div class="formula">fc = (1.8412 × c) / (π × D)</div>  
+                <div class="explanation">Cutoff frequency for the circular waveguide</div>  
+            </div>  
+            <div class="formula-item">  
+                <div class="formula">λg = λ / √(1 − (fc / f)²)</div>  
+                <div class="explanation">Guide wavelength inside the can</div>  
+            </div>  
+            <div class="formula-item">  
+                <div class="formula">Lw = λ / 4</div>  
+                <div class="explanation">Optimal copper wire length is quarter wavelength</div>  
+            </div>  
+            <div class="formula-item">  
+                <div class="formula">Dback = λg / 4</div>  
+                <div class="explanation">Copper wire offset from the back of the can</div>  
+            </div>  
+            <div class="formula-item">  
+                <div class="formula">Drim = L − Dback</div>  
+                <div class="explanation">Distance from copper wire to the open rim</div>  
+            </div>  
+        </div>  
+    </div>  
 
-    <script>
-        // Constants
-        const C = 3e8; // Speed of light in m/s
-        const F = 2.4e9; // Fixed frequency in Hz
+    <script>  
+        const C = 3e8;
+        const F = 2.4e9;
 
-        // DOM elements
-        const diameterInput = document.getElementById('diameter');
-        const radiusInput = document.getElementById('radius');
-        const lengthInput = document.getElementById('length');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const errorMessage = document.getElementById('errorMessage');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = document.getElementById('darkModeIcon');
-        const canvas = document.getElementById('simulationCanvas');
-        const ctx = canvas.getContext('2d');
-        const calculationSteps = document.getElementById('calculationSteps');
-        const stepsContainer = document.getElementById('stepsContainer');
+        const diameterInput = document.getElementById('diameter');  
+        const radiusInput = document.getElementById('radius');  
+        const lengthInput = document.getElementById('length');  
+        const calculateBtn = document.getElementById('calculateBtn');  
+        const resetBtn = document.getElementById('resetBtn');  
+        const errorMessage = document.getElementById('errorMessage');  
+        const darkModeToggle = document.getElementById('darkModeToggle');  
+        const darkModeIcon = document.getElementById('darkModeIcon');  
+        const canvas = document.getElementById('simulationCanvas');  
+        const ctx = canvas.getContext('2d');  
+        const calculationSteps = document.getElementById('calculationSteps');  
+        const stepsContainer = document.getElementById('stepsContainer');  
 
-        // Result elements
-        const wavelengthEl = document.getElementById('wavelength');
-        const cutoffFreqEl = document.getElementById('cutoffFreq');
-        const guideWavelengthEl = document.getElementById('guideWavelength');
-        const wireLengthEl = document.getElementById('wireLength');
-        const wireOffsetEl = document.getElementById('wireOffset');
-        const wireToRimEl = document.getElementById('wireToRim');
+        const wavelengthEl = document.getElementById('wavelength');  
+        const cutoffFreqEl = document.getElementById('cutoffFreq');  
+        const guideWavelengthEl = document.getElementById('guideWavelength');  
+        const wireLengthEl = document.getElementById('wireLength');  
+        const wireOffsetEl = document.getElementById('wireOffset');  
+        const wireToRimEl = document.getElementById('wireToRim');  
 
-        // State variables
         let isDarkMode = false;
-        let hasError = false;
 
-        // --- NEW HELPER FUNCTIONS ---
-        /**
-         * Shows a message in the error box.
-         * @param {string} message The text to display.
-         * @param {boolean} [isWarning=false] True for a warning (yellow), false for an error (red).
-         */
-        function showMessage(message, isWarning = false) {
-            errorMessage.textContent = message;
-            if (isWarning) {
-                errorMessage.classList.add('warning');
-                errorMessage.classList.remove('error'); // Ensure it's not styled as error
-            } else {
-                errorMessage.classList.remove('warning');
-                errorMessage.classList.add('error'); // Ensure it's styled as error
-            }
-            errorMessage.classList.add('show');
-        }
+        function showMessage(message, isWarning = false) {  
+            errorMessage.textContent = message;  
+            errorMessage.classList.toggle('warning', isWarning);
+            errorMessage.classList.add('show');  
+        }  
 
-        /** Hides the error message box. */
-        function hideMessage() {
-            errorMessage.textContent = '';
-            errorMessage.classList.remove('show');
-            errorMessage.classList.remove('warning');
-            errorMessage.classList.remove('error');
-        }
+        function hideMessage() {  
+            errorMessage.textContent = '';  
+            errorMessage.classList.remove('show', 'warning');  
+        }  
         
-        // --- NEW LIVE VALIDATION FUNCTION ---
-        /** Validates inputs as the user types, showing warnings for min/max. */
-        function validateInputsLive() {
-            // Get values
-            const diameter = parseFloat(diameterInput.value);
-            const radius = parseFloat(radiusInput.value);
-            const length = parseFloat(lengthInput.value);
+        function isInputValid() {
+            const diameter = parseFloat(diameterInput.value);  
+            const radius = parseFloat(radiusInput.value);  
+            const length = parseFloat(lengthInput.value);  
 
-            // Get limits
-            const minDiameter = parseFloat(diameterInput.min);
-            const maxDiameter = parseFloat(diameterInput.max);
-            const minRadius = parseFloat(radiusInput.min);
-            const maxRadius = parseFloat(radiusInput.max);
-            const minLength = parseFloat(lengthInput.min);
+            const minDiameter = parseFloat(diameterInput.min);  
+            const maxDiameter = parseFloat(diameterInput.max);  
+            const minRadius = parseFloat(radiusInput.min);  
+            const maxRadius = parseFloat(radiusInput.max);  
+            const minLength = parseFloat(lengthInput.min);  
             const maxLength = parseFloat(lengthInput.max);
 
-            // Check for non-numeric, but ignore empty fields
-            if ((diameterInput.value && isNaN(diameter)) || 
-                (radiusInput.value && isNaN(radius)) || 
-                (lengthInput.value && isNaN(length))) {
-                showMessage('Please enter only valid numbers.', true);
-                return;
+            // Check for empty or invalid values
+            if (!diameterInput.value || !radiusInput.value || !lengthInput.value) {
+                return false;
             }
 
-            // Check min/max limits
-            if (diameter > 0 && diameter < minDiameter) {
-                showMessage(`Warning: Diameter is below the minimum of ${minDiameter} cm.`, true);
-                return;
-            }
-            if (diameter > maxDiameter) {
-                showMessage(`Warning: Diameter is above the maximum of ${maxDiameter} cm.`, true);
-                return;
+            if (isNaN(diameter) || isNaN(radius) || isNaN(length)) {
+                return false;
             }
 
-            if (radius > 0 && radius < minRadius) {
-                showMessage(`Warning: Radius is below the minimum of ${minRadius} cm.`, true);
-                return;
-            }
-            if (radius > maxRadius) {
-                showMessage(`Warning: Radius is above the maximum of ${maxRadius} cm.`, true);
-                return;
+            // Check for negative or zero values
+            if (diameter <= 0 || radius <= 0 || length <= 0) {
+                return false;
             }
 
-            if (length > 0 && length < minLength) {
-                showMessage(`Warning: Length is below the minimum of ${minLength} cm.`, true);
-                return;
-            }
-            if (length > maxLength) {
-                showMessage(`Warning: Length is above the maximum of ${maxLength} cm.`, true);
-                return;
+            // Check min/max bounds
+            if (diameter < minDiameter || diameter > maxDiameter) {
+                return false;
             }
 
-            // If all live checks pass, hide the message
-            hideMessage();
-        }
-
-        // Initialize
-        function init() {
-            // Set up event listeners
-            diameterInput.addEventListener('input', handleDiameterChange);
-            radiusInput.addEventListener('input', handleRadiusChange);
-            
-            // --- UPDATED: Add live validation listeners ---
-            diameterInput.addEventListener('input', validateInputsLive);
-            radiusInput.addEventListener('input', validateInputsLive);
-            lengthInput.addEventListener('input', validateInputsLive);
-
-            calculateBtn.addEventListener('click', calculate);
-            resetBtn.addEventListener('click', resetForm);
-            darkModeToggle.addEventListener('click', toggleDarkMode);
-
-            // Set initial values
-            resetForm();
-        }
-
-        // Handle diameter input change
-        function handleDiameterChange() {
-            const diameter = parseFloat(diameterInput.value);
-            if (!isNaN(diameter)) {
-                // Update radius, maintaining precision
-                radiusInput.value = (diameter / 2).toFixed(4); 
-            }
-        }
-
-        // Handle radius input change
-        function handleRadiusChange() {
-            const radius = parseFloat(radiusInput.value);
-            if (!isNaN(radius)) {
-                 // Update diameter, maintaining precision
-                diameterInput.value = (radius * 2).toFixed(4);
-            }
-        }
-
-        // Perform calculations
-        function calculate() {
-            const diameter = parseFloat(diameterInput.value) / 100; // Convert to meters
-            const radius = parseFloat(radiusInput.value) / 100; // Convert to meters
-            const length = parseFloat(lengthInput.value) / 100; // Convert to meters
-
-            // Reset error state
-            hasError = false;
-            hideMessage(); // Use the new helper function
-            calculationSteps.style.display = 'none';
-
-            // Check if inputs are valid numbers
-            if (isNaN(diameter) || isNaN(radius) || isNaN(length) || 
-                diameter <= 0 || radius <= 0 || length <= 0) {
-                showMessage('Error: Please enter valid positive numbers for all dimensions.'); // Use helper
-                hasError = true;
-                clearResults();
-                clearSimulation();
-                return;
+            if (radius < minRadius || radius > maxRadius) {
+                return false;
             }
 
-            // Check diameter and radius consistency (using a small epsilon for float comparison)
+            if (length < minLength || length > maxLength) {
+                return false;
+            }
+
+            // Check diameter/radius consistency
             if (Math.abs(diameter - 2 * radius) > 0.0001) {
-                showMessage('Error: Diameter and radius do not match — diameter must always equal 2 × radius.'); // Use helper
-                hasError = true;
-                clearResults();
-                clearSimulation();
+                return false;
+            }
+
+            return true;
+        }
+          
+        function validateInputsLive() {  
+            const diameter = parseFloat(diameterInput.value);  
+            const radius = parseFloat(radiusInput.value);  
+            const length = parseFloat(lengthInput.value);  
+
+            const minDiameter = parseFloat(diameterInput.min);  
+            const maxDiameter = parseFloat(diameterInput.max);  
+            const minRadius = parseFloat(radiusInput.min);  
+            const maxRadius = parseFloat(radiusInput.max);  
+            const minLength = parseFloat(lengthInput.min);  
+            const maxLength = parseFloat(lengthInput.max);
+
+            // Remove previous styling
+            diameterInput.classList.remove('invalid', 'warning');
+            radiusInput.classList.remove('invalid', 'warning');
+            lengthInput.classList.remove('invalid', 'warning');
+
+            // Check for non-numeric entries
+            if (diameterInput.value && isNaN(diameter)) {  
+                diameterInput.classList.add('invalid');
+                showMessage('Diameter must be a valid number.', false);
+                calculateBtn.disabled = true;
+                return;  
+            }
+            
+            if (radiusInput.value && isNaN(radius)) {  
+                radiusInput.classList.add('invalid');
+                showMessage('Radius must be a valid number.', false);
+                calculateBtn.disabled = true;
+                return;  
+            }
+            
+            if (lengthInput.value && isNaN(length)) {  
+                lengthInput.classList.add('invalid');
+                showMessage('Length must be a valid number.', false);
+                calculateBtn.disabled = true;
+                return;  
+            }
+
+            // Check for negative values
+            if (diameterInput.value && diameter <= 0) {
+                diameterInput.classList.add('invalid');
+                showMessage('Diameter must be greater than zero.', false);
+                calculateBtn.disabled = true;
                 return;
             }
 
-            // Calculate parameters
-            const wavelength = C / F;
-            const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
-            const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
-            const wireLength = wavelength / 4;
-            const wireOffset = guideWavelength / 4;
-            const wireToRim = length - wireOffset;
-
-            // Check design rules (These are *final errors*, not warnings)
-            if (cutoffFreq >= F) {
-                showMessage(`Error: Can diameter is too small. Cutoff frequency (${(cutoffFreq / 1e9).toFixed(3)} GHz) is above 2.4 GHz. Increase diameter.`); // Use helper
-                hasError = true;
-                clearResults();
-                clearSimulation();
+            if (radiusInput.value && radius <= 0) {
+                radiusInput.classList.add('invalid');
+                showMessage('Radius must be greater than zero.', false);
+                calculateBtn.disabled = true;
                 return;
             }
 
-            if (wireToRim < 0) {
-                const minLen = wireOffset * 100;
-                showMessage(`Error: Can length is too short. It must be at least ${minLen.toFixed(2)} cm for this diameter. Please increase the length.`); // Use helper
-                hasError = true;
-                clearResults();
-                clearSimulation();
+            if (lengthInput.value && length <= 0) {
+                lengthInput.classList.add('invalid');
+                showMessage('Length must be greater than zero.', false);
+                calculateBtn.disabled = true;
                 return;
             }
 
-            // Update results if no errors
-            if (!hasError) {
-                updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
-                updateSimulation(diameter, length, wireOffset, wireLength);
-                showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);
+            // Check min/max limits with visual feedback
+            if (diameterInput.value && diameter < minDiameter) {  
+                diameterInput.classList.add('warning');
+                showMessage(`Warning: Diameter is below the minimum of ${minDiameter} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
+            }  
+            if (diameterInput.value && diameter > maxDiameter) {  
+                diameterInput.classList.add('warning');
+                showMessage(`Warning: Diameter is above the maximum of ${maxDiameter} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
+            }  
+
+            if (radiusInput.value && radius < minRadius) {  
+                radiusInput.classList.add('warning');
+                showMessage(`Warning: Radius is below the minimum of ${minRadius} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
+            }  
+            if (radiusInput.value && radius > maxRadius) {  
+                radiusInput.classList.add('warning');
+                showMessage(`Warning: Radius is above the maximum of ${maxRadius} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
+            }  
+
+            if (lengthInput.value && length < minLength) {  
+                lengthInput.classList.add('warning');
+                showMessage(`Warning: Length is below the minimum of ${minLength} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
+            }  
+            if (lengthInput.value && length > maxLength) {  
+                lengthInput.classList.add('warning');
+                showMessage(`Warning: Length is above the maximum of ${maxLength} cm.`, true);
+                calculateBtn.disabled = true;
+                return;  
             }
-        }
 
-        // Update result display
-        function updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {
-            wavelengthEl.textContent = (wavelength * 100).toFixed(2) + ' cm';
-            cutoffFreqEl.textContent = (cutoffFreq / 1e9).toFixed(3) + ' GHz';
-            guideWavelengthEl.textContent = (guideWavelength * 100).toFixed(2) + ' cm';
-            wireLengthEl.textContent = (wireLength * 100).toFixed(2) + ' cm';
-            wireOffsetEl.textContent = (wireOffset * 100).toFixed(2) + ' cm';
-            wireToRimEl.textContent = (wireToRim * 100).toFixed(2) + ' cm';
-        }
+            // Check if all fields are filled
+            if (!diameterInput.value || !radiusInput.value || !lengthInput.value) {
+                hideMessage();
+                calculateBtn.disabled = true;
+                return;
+            }
 
-        // Clear results
-        function clearResults() {
-            wavelengthEl.textContent = '0 cm';
-            cutoffFreqEl.textContent = '0 GHz';
-            guideWavelengthEl.textContent = '0 cm';
-            wireLengthEl.textContent = '0 cm';
-            wireOffsetEl.textContent = '0 cm';
-            wireToRimEl.textContent = '0 cm';
-        }
+            // All validations passed
+            hideMessage();
+            calculateBtn.disabled = false;
+        }  
 
-        // Show calculation steps
-        function showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {
-            stepsContainer.innerHTML = '';
+        function init() {  
+            diameterInput.addEventListener('input', handleDiameterChange);  
+            radiusInput.addEventListener('input', handleRadiusChange);  
             
-            // Step 1: Wavelength calculation
-            const step1 = document.createElement('div');
-            step1.className = 'calculation-step';
-            step1.innerHTML = `
-                <div class="step-title">Calculate Wavelength (λ)</div>
-                <div class="step-formula">λ = c / f</div>
-                <div class="step-explanation">Where c = speed of light (3×10⁸ m/s), f = frequency (2.4 GHz)</div>
-                <div class="step-substitution">λ = 3×10⁸ m/s / 2.4×10⁹ Hz</div>
-                <div class="step-substitution">λ = ${wavelength.toFixed(4)} m</div>
-                <div class="step-result">Wavelength: ${(wavelength * 100).toFixed(2)} cm</div>
-            `;
-            stepsContainer.appendChild(step1);
-            
-            // Step 2: Cutoff frequency calculation
-            const step2 = document.createElement('div');
-            step2.className = 'calculation-step';
-            step2.innerHTML = `
-                <div class="step-title">Calculate Cutoff Frequency (fc)</div>
-                <div class="step-formula">fc = (1.8412 × c) / (π × D)</div>
-                <div class="step-explanation">Where D = diameter of can (${(diameter * 100).toFixed(1)} cm)</div>
-                <div class="step-substitution">fc = (1.8412 × 3×10⁸ m/s) / (π × ${diameter.toFixed(4)} m)</div>
-                <div class="step-substitution">fc = ${(1.8412 * C).toExponential(2)} / ${(Math.PI * diameter).toFixed(4)}</div>
-                <div class="step-substitution">fc = ${cutoffFreq.toExponential(2)} Hz</div>
-                <div class="step-result">Cutoff Frequency: ${(cutoffFreq / 1e9).toFixed(3)} GHz</div>
-            `;
-            stepsContainer.appendChild(step2);
-            
-            // Step 3: Guide wavelength calculation
-            const step3 = document.createElement('div');
-            step3.className = 'calculation-step';
-            step3.innerHTML = `
-                <div class="step-title">Calculate Guide Wavelength (λg)</div>
-                <div class="step-formula">λg = λ / √(1 − (fc / f)²)</div>
-                <div class="step-explanation">Where fc = ${(cutoffFreq / 1e9).toFixed(3)} GHz, f = 2.4 GHz</div>
-                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − (${(cutoffFreq / F).toFixed(4)})²)</div>
-                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − ${Math.pow(cutoffFreq / F, 2).toFixed(4)})</div>
-                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(${(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)})</div>
-                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / ${Math.sqrt(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)}</div>
-                <div class="step-substitution">λg = ${guideWavelength.toFixed(4)} m</div>
-                <div class="step-result">Guide Wavelength: ${(guideWavelength * 100).toFixed(2)} cm</div>
-            `;
-            stepsContainer.appendChild(step3);
-            
-            // Step 4: Copper wire length calculation
-            const step4 = document.createElement('div');
-            step4.className = 'calculation-step';
-            step4.innerHTML = `
-                <div class="step-title">Calculate Copper Wire Length (Lw)</div>
-                <div class="step-formula">Lw = λ / 4</div>
-                <div class="step-explanation">Optimal copper wire length is quarter wavelength</div>
-                <div class="step-substitution">Lw = ${wavelength.toFixed(4)} / 4</div>
-                <div class="step-substitution">Lw = ${wireLength.toFixed(4)} m</div>
-                <div class="step-result">Copper Wire Length: ${(wireLength * 100).toFixed(2)} cm</div>
-            `;
-            stepsContainer.appendChild(step4);
-            
-            // Step 5: Wire offset calculation
-            const step5 = document.createElement('div');
-            step5.className = 'calculation-step';
-            step5.innerHTML = `
-                <div class="step-title">Calculate Wire Offset from Back (Dback)</div>
-                <div class="step-formula">Dback = λg / 4</div>
-                <div class="step-explanation">Copper wire offset from the back of the can</div>
-                <div class="step-substitution">Dback = ${guideWavelength.toFixed(4)} / 4</div>
-                <div class="step-substitution">Dback = ${wireOffset.toFixed(4)} m</div>
-                <div class="step-result">Wire Offset from Back: ${(wireOffset * 100).toFixed(2)} cm</div>
-            `;
-            stepsContainer.appendChild(step5);
-            
-            // Step 6: Wire to rim distance calculation
-            const step6 = document.createElement('div');
-            step6.className = 'calculation-step';
-            step6.innerHTML = `
-                <div class="step-title">Calculate Wire to Rim Distance (Drim)</div>
-                <div class="step-formula">Drim = L − Dback</div>
-                <div class="step-explanation">Where L = can length (${(length * 100).toFixed(1)} cm)</div>
-                <div class="step-substitution">Drim = ${length.toFixed(4)} - ${wireOffset.toFixed(4)}</div>
-                <div class="step-substitution">Drim = ${wireToRim.toFixed(4)} m</div>
-                <div class="step-result">Wire to Rim Distance: ${(wireToRim * 100).toFixed(2)} cm</div>
-            `;
-            stepsContainer.appendChild(step6);
-            
-            calculationSteps.style.display = 'block';
-        }
+            diameterInput.addEventListener('input', validateInputsLive);  
+            radiusInput.addEventListener('input', validateInputsLive);  
+            lengthInput.addEventListener('input', validateInputsLive);  
 
-        // Update simulation - CORRECTED VERSION
-        function updateSimulation(diameter, length, wireOffset, wireLength) {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Scale factors for visualization
-            const scaleX = canvas.width / (length * 1.2); // Add some padding
-            const scaleY = canvas.height / (diameter * 3); // Make it visually appealing
-            
-            // Draw can body (side view)
-            const canX = 100;
-            const canY = canvas.height / 2;
-            const canWidth = length * scaleX;
-            const canHeight = diameter * scaleY;
-            
-            // Draw can as a cylinder (side view)
-            ctx.fillStyle = '#8B4513'; // Brown for can
-            ctx.fillRect(canX, canY - canHeight/2, canWidth, canHeight);
-            
-            // Draw the back of the can
-            ctx.fillStyle = '#A0522D'; // Darker brown for back
-            ctx.fillRect(canX, canY - canHeight/2, 5, canHeight);
-            
-            // Draw N-type connector on the side wall at the calculated offset
-            const connectorX = canX + (wireOffset * scaleX);
-            const connectorSize = Math.min(canHeight * 0.15, 20);
-            
-            // Draw connector body on the side of the can
-            ctx.fillStyle = '#C0C0C0'; // Silver for connector
-            ctx.fillRect(connectorX - connectorSize/2, canY + canHeight/2, connectorSize, connectorSize * 1.5);
-            
-            // Draw copper wire extending from the connector into the can
-            const wireStartX = connectorX;
-            const wireStartY = canY + canHeight/2;
-            const wireEndX = wireStartX;
-            const wireEndY = canY - canHeight/2 + (wireLength * scaleY);
-            
-            ctx.strokeStyle = '#FFD700'; // Gold for copper wire
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(wireStartX, wireStartY);
-            ctx.lineTo(wireEndX, wireEndY);
-            ctx.stroke();
-            
-            // Draw LMR400 cable coming out from the connector
-            ctx.strokeStyle = '#0000FF'; // Blue for cable
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(connectorX, canY + canHeight/2 + connectorSize * 1.5);
-            ctx.lineTo(connectorX, canY + canHeight/2 + connectorSize * 3);
-            ctx.lineTo(canX + canWidth + 50, canY + canHeight/2 + connectorSize * 3);
-            ctx.stroke();
-            
-            // Add labels
-            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';
-            ctx.font = '14px Arial';
-            ctx.fillText('Can Body', canX + canWidth/2 - 30, canY - canHeight/2 - 10);
-            ctx.fillText('N-Type Connector', connectorX - 40, canY + canHeight/2 + connectorSize * 2);
-            ctx.fillText('Copper Wire', wireStartX - 40, canY);
-            ctx.fillText('LMR400 Cable', canX + canWidth + 10, canY + canHeight/2 + connectorSize * 3 - 5);
-            
-            // Draw dimensions
-            drawDimension(ctx, canX, canY - canHeight/2 - 20, canX + canWidth, canY - canHeight/2 - 20, `Length: ${(length * 100).toFixed(1)} cm`);
-            drawDimension(ctx, canX + canWidth + 10, canY - canHeight/2, canX + canWidth + 10, canY + canHeight/2, `Diameter: ${(diameter * 100).toFixed(1)} cm`);
-            drawDimension(ctx, canX, canY + canHeight/2 + 10, connectorX, canY + canHeight/2 + 10, `Wire Offset: ${(wireOffset * 100).toFixed(1)} cm`);
-            
-            // Draw wire length dimension
-            drawDimension(ctx, wireStartX + 20, wireStartY, wireStartX + 20, wireEndY, `Wire Length: ${(wireLength * 100).toFixed(1)} cm`);
-        }
+            calculateBtn.addEventListener('click', calculate);  
+            resetBtn.addEventListener('click', resetForm);  
+            darkModeToggle.addEventListener('click', toggleDarkMode);  
 
-        // Helper function to draw dimension lines with text
-        function drawDimension(ctx, x1, y1, x2, y2, text) {
-            ctx.strokeStyle = isDarkMode ? '#e0e0e0' : '#333';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 3]);
-            
-            // Draw dimension line
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            
-            // Draw arrowheads
-            drawArrowhead(ctx, x1, y1, x2, y2);
-            drawArrowhead(ctx, x2, y2, x1, y1);
-            
-            // Reset line dash
-            ctx.setLineDash([]);
-            
-            // Draw text
-            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';
-            ctx.font = '12px Arial';
-            const textX = (x1 + x2) / 2 - ctx.measureText(text).width / 2;
-            const textY = y1 - 5;
-            ctx.fillText(text, textX, textY);
-        }
+            resetForm();  
+        }  
 
-        // Helper function to draw arrowheads
-        function drawArrowhead(ctx, x, y, tox, toy) {
-            const headlen = 10;
-            const angle = Math.atan2(toy - y, tox - x);
-            
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.stroke();
-        }
+        function handleDiameterChange() {  
+            const diameter = parseFloat(diameterInput.value);  
+            if (!isNaN(diameter) && diameter > 0) {  
+                radiusInput.value = (diameter / 2).toFixed(4);   
+            }  
+        }  
 
-        // Clear simulation
-        function clearSimulation() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        function handleRadiusChange() {  
+            const radius = parseFloat(radiusInput.value);  
+            if (!isNaN(radius) && radius > 0) {  
+                diameterInput.value = (radius * 2).toFixed(4);  
+            }  
+        }  
 
-        // Reset form
-        function resetForm() {
-            diameterInput.value = '0';
-            radiusInput.value = '0';
-            lengthInput.value = '0';
-            hideMessage(); // Use helper
-            hasError = false;
-            clearResults();
-            clearSimulation();
+        function calculate() {
+            // Final validation before calculation
+            if (!isInputValid()) {
+                showMessage('Error: Please correct all input values before calculating.', false);
+                clearResults();
+                clearSimulation();
+                calculationSteps.style.display = 'none';
+                return;
+            }
+
+            const diameter = parseFloat(diameterInput.value) / 100;
+            const radius = parseFloat(radiusInput.value) / 100;
+            const length = parseFloat(lengthInput.value) / 100;
+
+            hideMessage();
             calculationSteps.style.display = 'none';
-        }
 
-        // Toggle dark mode
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            document.body.classList.toggle('dark-mode', isDarkMode);
-            darkModeIcon.textContent = isDarkMode ? '☀️' : '🌙';
-            
-            // Redraw simulation with updated colors if needed
-            if (!hasError && parseFloat(diameterInput.value) > 0) {
-                const diameter = parseFloat(diameterInput.value) / 100;
-                const length = parseFloat(lengthInput.value) / 100;
-                const wavelength = C / F;
-                const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);
-                const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));
-                const wireLength = wavelength / 4;
-                const wireOffset = guideWavelength / 4;
-                
-                updateSimulation(diameter, length, wireOffset, wireLength);
-            }
-        }
+            // Check diameter and radius consistency
+            if (Math.abs(diameter - 2 * radius) > 0.0001) {  
+                showMessage('Error: Diameter and radius do not match — diameter must equal 2 × radius.', false);
+                clearResults();  
+                clearSimulation();  
+                return;  
+            }  
 
-        // Initialize the application
-        init();
+            // Calculate parameters  
+            const wavelength = C / F;  
+            const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);  
+            const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));  
+            const wireLength = wavelength / 4;  
+            const wireOffset = guideWavelength / 4;  
+            const wireToRim = length - wireOffset;  
+
+            // Check design rules
+            if (cutoffFreq >= F) {  
+                showMessage(`Error: Can diameter is too small. Cutoff frequency (${(cutoffFreq / 1e9).toFixed(3)} GHz) is above 2.4 GHz. Increase diameter.`, false);
+                clearResults();  
+                clearSimulation();  
+                return;  
+            }  
+
+            if (wireToRim < 0) {  
+                const minLen = wireOffset * 100;  
+                showMessage(`Error: Can length is too short. It must be at least ${minLen.toFixed(2)} cm for this diameter. Please increase the length.`, false);
+                clearResults();  
+                clearSimulation();  
+                return;  
+            }  
+
+            // Update results
+            updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);  
+            updateSimulation(diameter, length, wireOffset, wireLength);  
+            showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim);  
+        }  
+
+        function updateResults(wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {  
+            wavelengthEl.textContent = (wavelength * 100).toFixed(2) + ' cm';  
+            cutoffFreqEl.textContent = (cutoffFreq / 1e9).toFixed(3) + ' GHz';  
+            guideWavelengthEl.textContent = (guideWavelength * 100).toFixed(2) + ' cm';  
+            wireLengthEl.textContent = (wireLength * 100).toFixed(2) + ' cm';  
+            wireOffsetEl.textContent = (wireOffset * 100).toFixed(2) + ' cm';  
+            wireToRimEl.textContent = (wireToRim * 100).toFixed(2) + ' cm';  
+        }  
+
+        function clearResults() {  
+            wavelengthEl.textContent = '—';  
+            cutoffFreqEl.textContent = '—';  
+            guideWavelengthEl.textContent = '—';  
+            wireLengthEl.textContent = '—';  
+            wireOffsetEl.textContent = '—';  
+            wireToRimEl.textContent = '—';  
+        }  
+
+        function showCalculationSteps(diameter, length, wavelength, cutoffFreq, guideWavelength, wireLength, wireOffset, wireToRim) {  
+            stepsContainer.innerHTML = '';  
+              
+            const step1 = document.createElement('div');  
+            step1.className = 'calculation-step';  
+            step1.innerHTML = `  
+                <div class="step-title">Calculate Wavelength (λ)</div>  
+                <div class="step-formula">λ = c / f</div>  
+                <div class="step-explanation">Where c = speed of light (3×10⁸ m/s), f = frequency (2.4 GHz)</div>  
+                <div class="step-substitution">λ = 3×10⁸ m/s / 2.4×10⁹ Hz</div>  
+                <div class="step-substitution">λ = ${wavelength.toFixed(4)} m</div>  
+                <div class="step-result">Wavelength: ${(wavelength * 100).toFixed(2)} cm</div>  
+            `;  
+            stepsContainer.appendChild(step1);  
+              
+            const step2 = document.createElement('div');  
+            step2.className = 'calculation-step';  
+            step2.innerHTML = `  
+                <div class="step-title">Calculate Cutoff Frequency (fc)</div>  
+                <div class="step-formula">fc = (1.8412 × c) / (π × D)</div>  
+                <div class="step-explanation">Where D = diameter of can (${(diameter * 100).toFixed(1)} cm)</div>  
+                <div class="step-substitution">fc = (1.8412 × 3×10⁸ m/s) / (π × ${diameter.toFixed(4)} m)</div>  
+                <div class="step-substitution">fc = ${(1.8412 * C).toExponential(2)} / ${(Math.PI * diameter).toFixed(4)}</div>  
+                <div class="step-substitution">fc = ${cutoffFreq.toExponential(2)} Hz</div>  
+                <div class="step-result">Cutoff Frequency: ${(cutoffFreq / 1e9).toFixed(3)} GHz</div>  
+            `;  
+            stepsContainer.appendChild(step2);  
+              
+            const step3 = document.createElement('div');  
+            step3.className = 'calculation-step';  
+            step3.innerHTML = `  
+                <div class="step-title">Calculate Guide Wavelength (λg)</div>  
+                <div class="step-formula">λg = λ / √(1 − (fc / f)²)</div>  
+                <div class="step-explanation">Where fc = ${(cutoffFreq / 1e9).toFixed(3)} GHz, f = 2.4 GHz</div>  
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − (${(cutoffFreq / F).toFixed(4)})²)</div>  
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(1 − ${Math.pow(cutoffFreq / F, 2).toFixed(4)})</div>  
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / √(${(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)})</div>  
+                <div class="step-substitution">λg = ${wavelength.toFixed(4)} / ${Math.sqrt(1 - Math.pow(cutoffFreq / F, 2)).toFixed(4)}</div>  
+                <div class="step-substitution">λg = ${guideWavelength.toFixed(4)} m</div>  
+                <div class="step-result">Guide Wavelength: ${(guideWavelength * 100).toFixed(2)} cm</div>  
+            `;  
+            stepsContainer.appendChild(step3);  
+              
+            const step4 = document.createElement('div');  
+            step4.className = 'calculation-step';  
+            step4.innerHTML = `  
+                <div class="step-title">Calculate Copper Wire Length (Lw)</div>  
+                <div class="step-formula">Lw = λ / 4</div>  
+                <div class="step-explanation">Optimal copper wire length is quarter wavelength</div>  
+                <div class="step-substitution">Lw = ${wavelength.toFixed(4)} / 4</div>  
+                <div class="step-substitution">Lw = ${wireLength.toFixed(4)} m</div>  
+                <div class="step-result">Copper Wire Length: ${(wireLength * 100).toFixed(2)} cm</div>  
+            `;  
+            stepsContainer.appendChild(step4);  
+              
+            const step5 = document.createElement('div');  
+            step5.className = 'calculation-step';  
+            step5.innerHTML = `  
+                <div class="step-title">Calculate Wire Offset from Back (Dback)</div>  
+                <div class="step-formula">Dback = λg / 4</div>  
+                <div class="step-explanation">Copper wire offset from the back of the can</div>  
+                <div class="step-substitution">Dback = ${guideWavelength.toFixed(4)} / 4</div>  
+                <div class="step-substitution">Dback = ${wireOffset.toFixed(4)} m</div>  
+                <div class="step-result">Wire Offset from Back: ${(wireOffset * 100).toFixed(2)} cm</div>  
+            `;  
+            stepsContainer.appendChild(step5);  
+              
+            const step6 = document.createElement('div');  
+            step6.className = 'calculation-step';  
+            step6.innerHTML = `  
+                <div class="step-title">Calculate Wire to Rim Distance (Drim)</div>  
+                <div class="step-formula">Drim = L − Dback</div>  
+                <div class="step-explanation">Where L = can length (${(length * 100).toFixed(1)} cm)</div>  
+                <div class="step-substitution">Drim = ${length.toFixed(4)} - ${wireOffset.toFixed(4)}</div>  
+                <div class="step-substitution">Drim = ${wireToRim.toFixed(4)} m</div>  
+                <div class="step-result">Wire to Rim Distance: ${(wireToRim * 100).toFixed(2)} cm</div>  
+            `;  
+            stepsContainer.appendChild(step6);  
+              
+            calculationSteps.style.display = 'block';  
+        }  
+
+        function updateSimulation(diameter, length, wireOffset, wireLength) {  
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  
+              
+            const scaleX = canvas.width / (length * 1.2);
+            const scaleY = canvas.height / (diameter * 3);
+              
+            const canX = 100;  
+            const canY = canvas.height / 2;  
+            const canWidth = length * scaleX;  
+            const canHeight = diameter * scaleY;  
+              
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(canX, canY - canHeight/2, canWidth, canHeight);  
+              
+            ctx.fillStyle = '#A0522D';
+            ctx.fillRect(canX, canY - canHeight/2, 5, canHeight);  
+              
+            const connectorX = canX + (wireOffset * scaleX);  
+            const connectorSize = Math.min(canHeight * 0.15, 20);  
+              
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(connectorX - connectorSize/2, canY + canHeight/2, connectorSize, connectorSize * 1.5);  
+              
+            const wireStartX = connectorX;  
+            const wireStartY = canY + canHeight/2;  
+            const wireEndX = wireStartX;  
+            const wireEndY = canY - canHeight/2 + (wireLength * scaleY);  
+              
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 3;  
+            ctx.beginPath();  
+            ctx.moveTo(wireStartX, wireStartY);  
+            ctx.lineTo(wireEndX, wireEndY);  
+            ctx.stroke();  
+              
+            ctx.strokeStyle = '#0000FF';
+            ctx.lineWidth = 3;  
+            ctx.beginPath();  
+            ctx.moveTo(connectorX, canY + canHeight/2 + connectorSize * 1.5);  
+            ctx.lineTo(connectorX, canY + canHeight/2 + connectorSize * 3);  
+            ctx.lineTo(canX + canWidth + 50, canY + canHeight/2 + connectorSize * 3);  
+            ctx.stroke();  
+              
+            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';  
+            ctx.font = '14px Arial';  
+            ctx.fillText('Can Body', canX + canWidth/2 - 30, canY - canHeight/2 - 10);  
+            ctx.fillText('N-Type Connector', connectorX - 40, canY + canHeight/2 + connectorSize * 2);  
+            ctx.fillText('Copper Wire', wireStartX - 40, canY);  
+            ctx.fillText('LMR400 Cable', canX + canWidth + 10, canY + canHeight/2 + connectorSize * 3 - 5);  
+              
+            drawDimension(ctx, canX, canY - canHeight/2 - 20, canX + canWidth, canY - canHeight/2 - 20, `Length: ${(length * 100).toFixed(1)} cm`);  
+            drawDimension(ctx, canX + canWidth + 10, canY - canHeight/2, canX + canWidth + 10, canY + canHeight/2, `Diameter: ${(diameter * 100).toFixed(1)} cm`);  
+            drawDimension(ctx, canX, canY + canHeight/2 + 10, connectorX, canY + canHeight/2 + 10, `Wire Offset: ${(wireOffset * 100).toFixed(1)} cm`);  
+            drawDimension(ctx, wireStartX + 20, wireStartY, wireStartX + 20, wireEndY, `Wire Length: ${(wireLength * 100).toFixed(1)} cm`);  
+        }  
+
+        function drawDimension(ctx, x1, y1, x2, y2, text) {  
+            ctx.strokeStyle = isDarkMode ? '#e0e0e0' : '#333';  
+            ctx.lineWidth = 1;  
+            ctx.setLineDash([5, 3]);  
+              
+            ctx.beginPath();  
+            ctx.moveTo(x1, y1);  
+            ctx.lineTo(x2, y2);  
+            ctx.stroke();  
+              
+            drawArrowhead(ctx, x1, y1, x2, y2);  
+            drawArrowhead(ctx, x2, y2, x1, y1);  
+              
+            ctx.setLineDash([]);  
+              
+            ctx.fillStyle = isDarkMode ? '#e0e0e0' : '#333';  
+            ctx.font = '12px Arial';  
+            const textX = (x1 + x2) / 2 - ctx.measureText(text).width / 2;  
+            const textY = y1 - 5;  
+            ctx.fillText(text, textX, textY);  
+        }  
+
+        function drawArrowhead(ctx, x, y, tox, toy) {  
+            const headlen = 10;  
+            const angle = Math.atan2(toy - y, tox - x);  
+              
+            ctx.beginPath();  
+            ctx.moveTo(x, y);  
+            ctx.lineTo(x - headlen * Math.cos(angle - Math.PI / 6), y - headlen * Math.sin(angle - Math.PI / 6));  
+            ctx.moveTo(x, y);  
+            ctx.lineTo(x - headlen * Math.cos(angle + Math.PI / 6), y - headlen * Math.sin(angle + Math.PI / 6));  
+            ctx.stroke();  
+        }  
+
+        function clearSimulation() {  
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  
+        }  
+
+        function resetForm() {  
+            diameterInput.value = '';  
+            radiusInput.value = '';  
+            lengthInput.value = '';
+            diameterInput.classList.remove('invalid', 'warning');
+            radiusInput.classList.remove('invalid', 'warning');
+            lengthInput.classList.remove('invalid', 'warning');
+            hideMessage();
+            clearResults();  
+            clearSimulation();  
+            calculationSteps.style.display = 'none';
+            calculateBtn.disabled = true;
+        }  
+
+        function toggleDarkMode() {  
+            isDarkMode = !isDarkMode;  
+            document.body.classList.toggle('dark-mode', isDarkMode);  
+            darkModeIcon.textContent = isDarkMode ? '☀️' : '🌙';  
+              
+            if (isInputValid()) {  
+                const diameter = parseFloat(diameterInput.value) / 100;  
+                const length = parseFloat(lengthInput.value) / 100;  
+                const wavelength = C / F;  
+                const cutoffFreq = (1.8412 * C) / (Math.PI * diameter);  
+                const guideWavelength = wavelength / Math.sqrt(1 - Math.pow(cutoffFreq / F, 2));  
+                const wireLength = wavelength / 4;  
+                const wireOffset = guideWavelength / 4;  
+                  
+                updateSimulation(diameter, length, wireOffset, wireLength);  
+            }  
+        }  
+
+        init();  
     </script>
-</body>
+</body>  
 </html>
