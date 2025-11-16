@@ -592,12 +592,11 @@
         if (diameter > maxDiameter) {
             showMessage(
                 validationMessage,
-                'warning',
-                `Diameter exceeds ${maxDiameter} cm. Higher-order modes may propagate and degrade performance.`
+                'error',
+                `Diameter too large (max ${maxDiameter} cm). Higher-order modes will propagate and severely degrade performance.`
             );
-            diameterInput.classList.add('warning');
-            calculateBtn.disabled = false;
-            return true;
+            diameterInput.classList.add('invalid');
+            return false;
         }
 
         // Length range (cm)
