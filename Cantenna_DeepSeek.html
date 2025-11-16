@@ -609,12 +609,11 @@
         if (length > 50) {
             showMessage(
                 validationMessage,
-                'warning',
-                'Length exceeds 50 cm. Very long cans may have increased losses and diminishing returns.'
+                'error',
+                'Length exceeds maximum (50 cm). Very long cans have excessive losses and are impractical.'
             );
-            lengthInput.classList.add('warning');
-            calculateBtn.disabled = false;
-            return true;
+            lengthInput.classList.add('invalid');
+            return false;
         }
 
         // 5–10 cm: warn but allow
@@ -700,27 +699,38 @@
             // Probe position: λg/4
             const probePosition = guideWavelength / 4; // m
 
-            // Check minimal can length with reasonable limits
-            const minLength = Math.max(probePosition * 1.2, 0.05); // At least 5 cm
+            // Check minimal can length intelligently
+            // When very close to cutoff, guide wavelength explodes
+            // Use practical minimum based on diameter
+            const theoreticalMinLength = probePosition * 1.2;
             
-            // Only enforce if the required length is reasonable (< 50 cm)
-            if (length < minLength && minLength < 0.50) {
+            // For diameters close to cutoff (< 8 cm), cap minimum at 12 cm
+            // For larger diameters, allow up to 20 cm minimum
+            let practicalMinLength;
+            if (diameterCm < 8) {
+                practicalMinLength = Math.min(theoreticalMinLength, 0.12); // Cap at 12 cm
+            } else {
+                practicalMinLength = Math.min(theoreticalMinLength, 0.20); // Cap at 20 cm
+            }
+            
+            // Only enforce if length is below practical minimum and it's reasonable
+            if (length < practicalMinLength && practicalMinLength <= 0.20) {
                 showMessage(
                     validationMessage,
                     'error',
-                    `Can too short. Minimum length for this diameter: ${(minLength * 100).toFixed(1)} cm.`
+                    `Can too short. Minimum length for this diameter: ${(practicalMinLength * 100).toFixed(1)} cm.`
                 );
                 lengthInput.classList.add('invalid');
                 clearResults();
                 return;
             }
             
-            // Warn if close to cutoff and using short can
-            if (ratio > 0.9 && length < 0.15) {
+            // Warn if close to cutoff (fc/f > 0.85) - suggest larger diameter
+            if (ratio > 0.85) {
                 showMessage(
                     validationMessage,
                     'warning',
-                    'Diameter very close to cutoff. Consider using diameter ≥ 8 cm for better performance with this length.'
+                    `Diameter very close to cutoff (fc/f = ${ratio.toFixed(3)}). For better performance and bandwidth, consider using diameter ≥ 8 cm.`
                 );
                 diameterInput.classList.add('warning');
             }
