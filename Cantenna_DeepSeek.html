@@ -176,9 +176,19 @@
             color: white;
         }
 
+        .primary-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+        }
+
         .secondary-btn {
             background-color: var(--border-color);
             color: var(--text-color);
+        }
+
+        .secondary-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .message {
@@ -224,6 +234,11 @@
             border-radius: 10px;
             text-align: center;
             border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+
+        .result-item:hover {
+            transform: translateY(-2px);
         }
 
         .result-label {
@@ -265,6 +280,11 @@
             box-shadow: var(--shadow);
             z-index: 100;
             font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
         }
 
         .hidden {
@@ -386,7 +406,7 @@
             <input type="number" id="length" min="5" max="50" step="0.1"
                    placeholder="Enter length (5 - 50 cm)">
             <div class="dimension-range">
-                Allowed: 5–50 cm | Optimal: 10–30 cm | Minimum depends on diameter
+                Allowed: 5–50 cm | Optimal: 10–30 cm
             </div>
         </div>
 
@@ -482,7 +502,6 @@
                 <div class="formula-explanation">
                     Quarter-wave monopole with logarithmic diameter correction.
                     Small cans (≈7.3–8 cm) → k ≈ 0.95–0.97; large cans (≈15 cm) → k ≈ 0.88.
-                    We clamp k between 0.85 and 0.97 for realism.
                 </div>
             </div>
             <div class="formula-item">
@@ -577,7 +596,8 @@
                 `Diameter exceeds ${maxDiameter} cm. Higher-order modes may propagate and degrade performance.`
             );
             diameterInput.classList.add('warning');
-            return false;
+            calculateBtn.disabled = false;
+            return true;
         }
 
         // Length range (cm)
@@ -599,27 +619,22 @@
         }
 
         // 5–10 cm: warn but allow
-        if (length >= 5 && length < 10) {
+        if (length < 10) {
             showMessage(
                 validationMessage,
                 'warning',
                 'Length is short (5–10 cm). Gain will be limited but design is still valid.'
             );
             lengthInput.classList.add('warning');
-            calculateBtn.disabled = false;
-            return true;
         }
-
         // >30–50 cm: warn but allow
-        if (length > 30 && length <= 50) {
+        else if (length > 30) {
             showMessage(
                 validationMessage,
                 'warning',
                 'Length exceeds the optimal range (30+ cm). Diminishing returns expected.'
             );
             lengthInput.classList.add('warning');
-            calculateBtn.disabled = false;
-            return true;
         }
 
         // All checks ok
@@ -629,7 +644,7 @@
 
     // ========= DESIGN CALCULATION =========
     function calculateDesign() {
-        const diameterCm = parseFloat(diameterInput.value); // input in cm
+        const diameterCm = parseFloat(diameterInput.value);
         const lengthCm = parseFloat(lengthInput.value);
 
         // Final validation gate
@@ -686,9 +701,11 @@
             // Probe position: λg/4
             const probePosition = guideWavelength / 4; // m
 
-            // Check minimal can length (20% margin beyond probe position)
-            const minLength = probePosition * 1.2;
-            if (length < minLength) {
+            // Check minimal can length with reasonable limits
+            const minLength = Math.max(probePosition * 1.2, 0.05); // At least 5 cm
+            
+            // Only enforce if the required length is reasonable (< 50 cm)
+            if (length < minLength && minLength < 0.50) {
                 showMessage(
                     validationMessage,
                     'error',
@@ -698,13 +715,23 @@
                 clearResults();
                 return;
             }
+            
+            // Warn if close to cutoff and using short can
+            if (ratio > 0.9 && length < 0.15) {
+                showMessage(
+                    validationMessage,
+                    'warning',
+                    'Diameter very close to cutoff. Consider using diameter ≥ 8 cm for better performance with this length.'
+                );
+                diameterInput.classList.add('warning');
+            }
 
             // Performance estimates
             const gain = estimateGain(diameter, length);
             const vswr = estimateVSWR(diameter, length);
             const beamwidth = estimateBeamwidth(diameter);
 
-            // Store results for display & drawings
+            // Store results
             currentResults = {
                 wavelength: LAMBDA,
                 cutoffFreq: fc,
@@ -840,7 +867,7 @@
             warnings.push('✓ <strong>High gain</strong> (&gt; 12 dBi): Excellent directivity and narrow beamwidth expected.');
         }
 
-        // “Optimal” region heuristic
+        // "Optimal" region heuristic
         if (
             lengthRatio >= 3 && lengthRatio <= 6 &&
             diameterCm >= 8.5 && diameterCm <= 12 &&
