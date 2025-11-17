@@ -115,8 +115,14 @@
             color: var(--text-color);
         }
 
+        .input-with-limits {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         input {
-            width: 100%;
+            flex: 1;
             padding: 12px 15px;
             border: 2px solid var(--border-color);
             border-radius: 8px;
@@ -142,11 +148,37 @@
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
 
+        .limit-btn {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .limit-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
         .dimension-range {
             font-size: 0.85rem;
             color: var(--text-color);
             opacity: 0.7;
             margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.7;
         }
 
         .button-group {
@@ -219,6 +251,12 @@
             color: var(--primary-color);
             background-color: rgba(67, 97, 238, 0.1);
             border-left-color: var(--primary-color);
+        }
+
+        .message.success {
+            color: var(--success-color);
+            background-color: rgba(42, 157, 143, 0.1);
+            border-left-color: var(--success-color);
         }
 
         .results {
@@ -350,6 +388,100 @@
             border-radius: 6px;
         }
 
+        .performance-meter {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .performance-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .performance-poor {
+            background-color: var(--error-color);
+        }
+
+        .performance-fair {
+            background-color: var(--warning-color);
+        }
+
+        .performance-good {
+            background-color: var(--success-color);
+        }
+
+        .performance-excellent {
+            background-color: var(--primary-color);
+        }
+
+        .performance-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .performance-value {
+            font-weight: bold;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .limit-explanation {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .limit-explanation h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .limit-explanation ul {
+            padding-left: 20px;
+        }
+
+        .limit-explanation li {
+            margin-bottom: 8px;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -375,6 +507,17 @@
                 top: 10px;
                 right: 10px;
             }
+            .tab {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            .input-with-limits {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .limit-btn {
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
@@ -394,20 +537,48 @@
         <h2>Can Geometry</h2>
         <div class="input-group">
             <label for="diameter">Diameter (D) in cm</label>
-            <input type="number" id="diameter" min="7.33" max="15" step="0.01"
-                   placeholder="Enter diameter (7.33 - 15 cm)">
+            <div class="input-with-limits">
+                <input type="number" id="diameter" min="7.33" max="15" step="0.01"
+                       placeholder="Enter diameter (7.33 - 15 cm)">
+                <button class="limit-btn" id="optimalDiameterBtn">Set Optimal (10 cm)</button>
+            </div>
             <div class="dimension-range">
-                Min: 7.33 cm (cutoff at 2.4 GHz) | Max: 15 cm (avoid higher modes)
+                <span>Minimum: 7.33 cm</span>
+                <span>Optimal: 8-12 cm</span>
+                <span>Maximum: 15 cm</span>
+            </div>
+            <div class="range-labels">
+                <span>Cutoff Limit</span>
+                <span>Higher Mode Risk</span>
             </div>
         </div>
 
         <div class="input-group">
             <label for="length">Length (L) in cm</label>
-            <input type="number" id="length" min="5" max="50" step="0.1"
-                   placeholder="Enter length (5 - 50 cm)">
-            <div class="dimension-range">
-                Allowed: 5–50 cm | Optimal: 10–30 cm
+            <div class="input-with-limits">
+                <input type="number" id="length" min="5" max="50" step="0.1"
+                       placeholder="Enter length (5 - 50 cm)">
+                <button class="limit-btn" id="optimalLengthBtn">Set Optimal (25 cm)</button>
             </div>
+            <div class="dimension-range">
+                <span>Minimum: 5 cm</span>
+                <span>Optimal: 15-35 cm</span>
+                <span>Maximum: 50 cm</span>
+            </div>
+            <div class="range-labels">
+                <span>Too Short</span>
+                <span>Diminishing Returns</span>
+            </div>
+        </div>
+
+        <div class="limit-explanation">
+            <h3>Design Limits Explained</h3>
+            <ul>
+                <li><strong>Diameter &lt; 7.33 cm:</strong> Waveguide cutoff frequency exceeds 2.4 GHz - no signal propagation</li>
+                <li><strong>Diameter &gt; 15 cm:</strong> Higher-order modes (TE₂₁, TM₀₁) can propagate, distorting radiation pattern</li>
+                <li><strong>Length &lt; 5 cm:</strong> Insufficient space for proper standing wave formation</li>
+                <li><strong>Length &gt; 50 cm:</strong> Increased losses with minimal gain improvement</li>
+            </ul>
         </div>
 
         <div class="message" id="validationMessage"></div>
@@ -453,24 +624,55 @@
                 <div class="result-label">Beamwidth</div>
                 <div class="result-value" id="beamwidth">—</div>
             </div>
+            <div class="result-item">
+                <div class="result-label">Bandwidth</div>
+                <div class="result-value" id="bandwidth">—</div>
+            </div>
         </div>
+        
+        <div style="margin-top: 25px;">
+            <div class="input-group">
+                <label>Design Performance Score</label>
+                <div class="performance-meter">
+                    <div class="performance-fill" id="performanceFill"></div>
+                </div>
+                <div class="performance-labels">
+                    <span>Poor</span>
+                    <span>Fair</span>
+                    <span>Good</span>
+                    <span>Excellent</span>
+                </div>
+                <div class="performance-value" id="performanceValue"></div>
+            </div>
+        </div>
+        
         <div class="message" id="designMessage"></div>
     </div>
 
-    <div class="card hidden" id="visualCard">
-        <h2>Visual Simulation</h2>
-        <canvas id="simulationCanvas" width="800" height="400"></canvas>
-        <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
-            <strong>Legend:</strong>
-            <span style="color: #8B4513;">█</span> Can Body •
-            <span style="color: #FFD700;">█</span> Probe •
-            <span style="color: #C0C0C0;">█</span> Connector
+    <div class="card hidden" id="tabsCard">
+        <div class="tab-container">
+            <div class="tab active" data-tab="visual">Visual Simulation</div>
+            <div class="tab" data-tab="calculations">Detailed Calculations</div>
+            <div class="tab" data-tab="performance">Performance Analysis</div>
         </div>
-    </div>
-
-    <div class="card hidden" id="calculationsCard">
-        <h2>Detailed Calculations</h2>
-        <div id="calculationsContent"></div>
+        
+        <div class="tab-content active" id="visualTab">
+            <canvas id="simulationCanvas" width="800" height="400"></canvas>
+            <div style="text-align: center; margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+                <strong>Legend:</strong>
+                <span style="color: #8B4513;">█</span> Can Body •
+                <span style="color: #FFD700;">█</span> Probe •
+                <span style="color: #C0C0C0;">█</span> Connector
+            </div>
+        </div>
+        
+        <div class="tab-content" id="calculationsTab">
+            <div id="calculationsContent"></div>
+        </div>
+        
+        <div class="tab-content" id="performanceTab">
+            <div id="performanceContent"></div>
+        </div>
     </div>
 
     <div class="card">
@@ -527,14 +729,18 @@
     const resetBtn = document.getElementById('resetBtn');
     const validationMessage = document.getElementById('validationMessage');
     const resultsCard = document.getElementById('resultsCard');
-    const visualCard = document.getElementById('visualCard');
-    const calculationsCard = document.getElementById('calculationsCard');
+    const tabsCard = document.getElementById('tabsCard');
     const calculationsContent = document.getElementById('calculationsContent');
+    const performanceContent = document.getElementById('performanceContent');
     const designMessage = document.getElementById('designMessage');
     const darkModeToggle = document.getElementById('darkModeToggle');
     const darkModeIcon = document.getElementById('darkModeIcon');
     const canvas = document.getElementById('simulationCanvas');
     const ctx = canvas.getContext('2d');
+    const performanceFill = document.getElementById('performanceFill');
+    const performanceValue = document.getElementById('performanceValue');
+    const optimalDiameterBtn = document.getElementById('optimalDiameterBtn');
+    const optimalLengthBtn = document.getElementById('optimalLengthBtn');
 
     let isDarkMode = false;
     let currentResults = null;
@@ -563,22 +769,13 @@
             return false;
         }
 
-        // Positive checks
-        if (diameter <= 0) {
-            showMessage(validationMessage, 'error', 'Diameter must be greater than zero.');
-            diameterInput.classList.add('invalid');
-            return false;
-        }
-        if (length <= 0) {
-            showMessage(validationMessage, 'error', 'Length must be greater than zero.');
-            lengthInput.classList.add('invalid');
-            return false;
-        }
-
-        // Diameter range (cm)
+        // Check absolute limits first
         const minDiameter = 7.33;
         const maxDiameter = 15;
+        const minLength = 5;
+        const maxLength = 50;
 
+        // Diameter checks
         if (diameter < minDiameter) {
             showMessage(
                 validationMessage,
@@ -593,49 +790,74 @@
             showMessage(
                 validationMessage,
                 'error',
-                `Diameter too large (max ${maxDiameter} cm). Higher-order modes will propagate and severely degrade performance.`
+                `Diameter exceeds maximum (${maxDiameter} cm). Higher-order modes will propagate and degrade performance.`
             );
             diameterInput.classList.add('invalid');
             return false;
         }
 
-        // Length range (cm)
-        if (length < 5) {
-            showMessage(validationMessage, 'error', 'Length must be at least 5 cm.');
-            lengthInput.classList.add('invalid');
-            return false;
-        }
-
-        if (length > 50) {
+        // Length checks
+        if (length < minLength) {
             showMessage(
                 validationMessage,
                 'error',
-                'Length exceeds maximum (50 cm). Very long cans have excessive losses and are impractical.'
+                `Length too short (min ${minLength} cm). Insufficient space for proper standing wave formation.`
             );
             lengthInput.classList.add('invalid');
             return false;
         }
 
-        // 5–10 cm: warn but allow
-        if (length < 10) {
+        if (length > maxLength) {
             showMessage(
                 validationMessage,
-                'warning',
-                'Length is short (5–10 cm). Gain will be limited but design is still valid.'
+                'error',
+                `Length exceeds maximum (${maxLength} cm). Increased losses with minimal gain improvement.`
             );
-            lengthInput.classList.add('warning');
-        }
-        // >30–50 cm: warn but allow
-        else if (length > 30) {
-            showMessage(
-                validationMessage,
-                'warning',
-                'Length exceeds the optimal range (30+ cm). Diminishing returns expected.'
-            );
-            lengthInput.classList.add('warning');
+            lengthInput.classList.add('invalid');
+            return false;
         }
 
-        // All checks ok
+        // Check optimal ranges and show warnings
+        const optimalDiameterMin = 8;
+        const optimalDiameterMax = 12;
+        const optimalLengthMin = 15;
+        const optimalLengthMax = 35;
+
+        let hasWarning = false;
+        let warningMessages = [];
+
+        // Diameter warnings
+        if (diameter < optimalDiameterMin) {
+            warningMessages.push(`Diameter (${diameter} cm) is below optimal range (${optimalDiameterMin}-${optimalDiameterMax} cm). Close to cutoff.`);
+            diameterInput.classList.add('warning');
+            hasWarning = true;
+        } else if (diameter > optimalDiameterMax) {
+            warningMessages.push(`Diameter (${diameter} cm) is above optimal range (${optimalDiameterMin}-${optimalDiameterMax} cm). Risk of higher-order modes.`);
+            diameterInput.classList.add('warning');
+            hasWarning = true;
+        }
+
+        // Length warnings
+        if (length < optimalLengthMin) {
+            warningMessages.push(`Length (${length} cm) is below optimal range (${optimalLengthMin}-${optimalLengthMax} cm). Limited gain.`);
+            lengthInput.classList.add('warning');
+            hasWarning = true;
+        } else if (length > optimalLengthMax) {
+            warningMessages.push(`Length (${length} cm) is above optimal range (${optimalLengthMin}-${optimalLengthMax} cm). Diminishing returns.`);
+            lengthInput.classList.add('warning');
+            hasWarning = true;
+        }
+
+        // Show warnings if any
+        if (hasWarning) {
+            showMessage(
+                validationMessage,
+                'warning',
+                warningMessages.join('<br>') + '<br><br>Design is still valid but performance may be suboptimal.'
+            );
+        }
+
+        // All checks passed
         calculateBtn.disabled = false;
         return true;
     }
@@ -699,46 +921,41 @@
             // Probe position: λg/4
             const probePosition = guideWavelength / 4; // m
 
-            // Check minimal can length intelligently
-            // When very close to cutoff, guide wavelength explodes
-            // Use practical minimum based on diameter
-            const theoreticalMinLength = probePosition * 1.2;
+            // Check minimal can length with reasonable limits
+            const minLength = Math.max(probePosition * 1.2, 0.05); // At least 5 cm
             
-            // For diameters close to cutoff (< 8 cm), cap minimum at 12 cm
-            // For larger diameters, allow up to 20 cm minimum
-            let practicalMinLength;
-            if (diameterCm < 8) {
-                practicalMinLength = Math.min(theoreticalMinLength, 0.12); // Cap at 12 cm
-            } else {
-                practicalMinLength = Math.min(theoreticalMinLength, 0.20); // Cap at 20 cm
-            }
-            
-            // Only enforce if length is below practical minimum and it's reasonable
-            if (length < practicalMinLength && practicalMinLength <= 0.20) {
+            // Only enforce if the required length is reasonable (< 50 cm)
+            if (length < minLength && minLength < 0.50) {
                 showMessage(
                     validationMessage,
                     'error',
-                    `Can too short. Minimum length for this diameter: ${(practicalMinLength * 100).toFixed(1)} cm.`
+                    `Can too short. Minimum length for this diameter: ${(minLength * 100).toFixed(1)} cm.`
                 );
                 lengthInput.classList.add('invalid');
                 clearResults();
                 return;
             }
             
-            // Warn if close to cutoff (fc/f > 0.85) - suggest larger diameter
-            if (ratio > 0.85) {
+            // Warn if close to cutoff and using short can
+            if (ratio > 0.9 && length < 0.15) {
                 showMessage(
                     validationMessage,
                     'warning',
-                    `Diameter very close to cutoff (fc/f = ${ratio.toFixed(3)}). For better performance and bandwidth, consider using diameter ≥ 8 cm.`
+                    'Diameter very close to cutoff. Consider using diameter ≥ 8 cm for better performance with this length.'
                 );
                 diameterInput.classList.add('warning');
             }
 
             // Performance estimates
-            const gain = estimateGain(diameter, length);
+            const gain = estimateGain(diameter, length, fc);
             const vswr = estimateVSWR(diameter, length);
             const beamwidth = estimateBeamwidth(diameter);
+            const bandwidth = estimateBandwidth(diameter, length, fc);
+
+            // Calculate performance score
+            const performanceScore = calculatePerformanceScore(
+                diameterCm, lengthCm, gain, vswr, beamwidth, bandwidth, fc
+            );
 
             // Store results
             currentResults = {
@@ -751,6 +968,8 @@
                 gain: gain,
                 vswr: vswr,
                 beamwidth: beamwidth,
+                bandwidth: bandwidth,
+                performanceScore: performanceScore,
                 diameter: diameter,
                 length: length
             };
@@ -758,6 +977,7 @@
             displayResults();
             generateWarnings();
             showCalculations();
+            showPerformanceAnalysis();
             drawSimulation();
         } catch (err) {
             console.error('Calculation error:', err);
@@ -766,20 +986,33 @@
         }
     }
 
-    function estimateGain(diameter, length) {
-        // Simplified aperture gain estimate (dBi)
+    // Improved gain estimation with length and cutoff dependence
+    function estimateGain(diameter, length, fc) {
+        // Aperture area
         const aperture = Math.PI * Math.pow(diameter / 2, 2);
-        const efficiency = 0.6;
+        
+        // Efficiency factor based on length and cutoff margin
+        const cutoffMargin = 1 - (fc / F);
+        const lengthFactor = 1 - Math.exp(-length / (2 * diameter));
+        const efficiency = 0.5 * cutoffMargin * lengthFactor;
+        
         const gainLinear = (4 * Math.PI * aperture * efficiency) / Math.pow(LAMBDA, 2);
         const gain = 10 * Math.log10(gainLinear);
-        return Math.max(3, Math.min(15, gain));
+        
+        // Apply realistic limits
+        return Math.max(3, Math.min(18, gain));
     }
 
+    // Improved VSWR estimation
     function estimateVSWR(diameter, length) {
         const idealRatio = length / diameter;
-        let vswr = 2.0;
+        let vswr = 2.5;
 
-        if (idealRatio > 3 && idealRatio < 6) {
+        if (idealRatio > 1.5 && idealRatio < 2.5) {
+            vswr = 2.0;
+        } else if (idealRatio >= 2.5 && idealRatio < 4) {
+            vswr = 1.8;
+        } else if (idealRatio >= 4 && idealRatio < 6) {
             vswr = 1.5;
         } else if (idealRatio >= 6) {
             vswr = 1.3;
@@ -788,10 +1021,58 @@
         return vswr;
     }
 
+    // Improved beamwidth estimation
     function estimateBeamwidth(diameter) {
         let beamwidth = 70 * (LAMBDA / diameter);
-        beamwidth = Math.max(30, Math.min(90, beamwidth));
+        beamwidth = Math.max(25, Math.min(90, beamwidth));
         return Math.round(beamwidth);
+    }
+
+    // Bandwidth estimation
+    function estimateBandwidth(diameter, length, fc) {
+        // Bandwidth depends on cutoff margin and length
+        const cutoffMargin = 1 - (fc / F);
+        const lengthFactor = Math.min(1, length / (3 * diameter));
+        
+        // Base bandwidth for cantennas is typically 5-10%
+        let bandwidthPercent = 5 + (15 * cutoffMargin * lengthFactor);
+        
+        // Convert to MHz
+        return (bandwidthPercent / 100) * (F / 1e6);
+    }
+
+    // Calculate overall performance score (0-100)
+    function calculatePerformanceScore(diameterCm, lengthCm, gain, vswr, beamwidth, bandwidth, fc) {
+        let score = 0;
+        
+        // Gain component (0-30 points)
+        score += Math.min(30, (gain - 3) * 2);
+        
+        // VSWR component (0-25 points)
+        if (vswr <= 1.5) score += 25;
+        else if (vswr <= 2.0) score += 20;
+        else if (vswr <= 2.5) score += 15;
+        else if (vswr <= 3.0) score += 10;
+        else score += 5;
+        
+        // Bandwidth component (0-20 points)
+        if (bandwidth >= 100) score += 20;
+        else if (bandwidth >= 80) score += 15;
+        else if (bandwidth >= 60) score += 10;
+        else if (bandwidth >= 40) score += 5;
+        
+        // Cutoff margin component (0-15 points)
+        const cutoffMargin = 1 - (fc / F);
+        score += Math.min(15, cutoffMargin * 30);
+        
+        // Length/Diameter ratio component (0-10 points)
+        const ratio = lengthCm / diameterCm;
+        if (ratio >= 2.5 && ratio <= 6) score += 10;
+        else if (ratio >= 2 && ratio <= 8) score += 7;
+        else if (ratio >= 1.5 && ratio <= 10) score += 5;
+        else score += 2;
+        
+        return Math.min(100, Math.round(score));
     }
 
     // ========= DISPLAY =========
@@ -815,9 +1096,28 @@
             r.vswr.toFixed(1) + ':1';
         document.getElementById('beamwidth').textContent =
             r.beamwidth + '°';
+        document.getElementById('bandwidth').textContent =
+            Math.round(r.bandwidth) + ' MHz';
+
+        // Update performance meter
+        performanceFill.style.width = `${r.performanceScore}%`;
+        
+        if (r.performanceScore >= 80) {
+            performanceFill.className = 'performance-fill performance-excellent';
+            performanceValue.textContent = `Excellent (${r.performanceScore}/100)`;
+        } else if (r.performanceScore >= 60) {
+            performanceFill.className = 'performance-fill performance-good';
+            performanceValue.textContent = `Good (${r.performanceScore}/100)`;
+        } else if (r.performanceScore >= 40) {
+            performanceFill.className = 'performance-fill performance-fair';
+            performanceValue.textContent = `Fair (${r.performanceScore}/100)`;
+        } else {
+            performanceFill.className = 'performance-fill performance-poor';
+            performanceValue.textContent = `Poor (${r.performanceScore}/100)`;
+        }
 
         resultsCard.classList.remove('hidden');
-        visualCard.classList.remove('hidden');
+        tabsCard.classList.remove('hidden');
     }
 
     function generateWarnings() {
@@ -876,6 +1176,13 @@
             warnings.push('✓ <strong>High gain</strong> (&gt; 12 dBi): Excellent directivity and narrow beamwidth expected.');
         }
 
+        // Bandwidth
+        if (r.bandwidth < 60) {
+            warnings.push('⚠️ <strong>Narrow bandwidth</strong> (&lt; 60 MHz): May not cover all Wi-Fi channels effectively.');
+        } else if (r.bandwidth > 100) {
+            warnings.push('✓ <strong>Wide bandwidth</strong> (&gt; 100 MHz): Good coverage across Wi-Fi channels.');
+        }
+
         // "Optimal" region heuristic
         if (
             lengthRatio >= 3 && lengthRatio <= 6 &&
@@ -887,21 +1194,26 @@
 
         if (warnings.length > 0) {
             const hasPositive = warnings.some(w => w.includes('✓') || w.includes('✅'));
+            const hasError = warnings.some(w => w.includes('⚠️'));
+            
+            let messageType = 'info';
+            if (hasError) messageType = 'warning';
+            if (hasPositive && !hasError) messageType = 'success';
+            
             showMessage(
                 designMessage,
-                hasPositive ? 'info' : 'warning',
+                messageType,
                 warnings.join('<br><br>')
             );
         } else {
-            showMessage(designMessage, 'info', '✓ Design parameters are acceptable.');
+            showMessage(designMessage, 'success', '✓ Design parameters are excellent.');
         }
     }
 
     function clearResults() {
         currentResults = null;
         resultsCard.classList.add('hidden');
-        visualCard.classList.add('hidden');
-        calculationsCard.classList.add('hidden');
+        tabsCard.classList.add('hidden');
         hideMessage(designMessage);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -1244,10 +1556,12 @@
                 <div class="calc-formula">Estimated Gain ≈ ${r.gain.toFixed(1)} dBi</div>
                 <div class="calc-formula">Estimated VSWR ≈ ${r.vswr.toFixed(1)}:1 (L/D = ${(r.length / r.diameter).toFixed(2)})</div>
                 <div class="calc-formula">Estimated Beamwidth ≈ ${r.beamwidth}° (≈ 70·λ/D)</div>
+                <div class="calc-formula">Estimated Bandwidth ≈ ${Math.round(r.bandwidth)} MHz</div>
                 <div class="calc-result">
                     Performance: Gain ≈ ${r.gain.toFixed(1)} dBi,
                     VSWR ≈ ${r.vswr.toFixed(1)}:1,
-                    Beamwidth ≈ ${r.beamwidth}°.
+                    Beamwidth ≈ ${r.beamwidth}°,
+                    Bandwidth ≈ ${Math.round(r.bandwidth)} MHz.
                 </div>
                 <div style="margin-top: 8px; font-size: 0.9rem; opacity: 0.8;">
                     These are theoretical estimates. Real performance depends on construction quality, connector matching, and tuning.
@@ -1256,7 +1570,143 @@
         `;
 
         calculationsContent.innerHTML = html;
-        calculationsCard.classList.remove('hidden');
+    }
+
+    // ========= PERFORMANCE ANALYSIS =========
+    function showPerformanceAnalysis() {
+        if (!currentResults) return;
+        const r = currentResults;
+
+        const d_cm = r.diameter * 100;
+        const l_cm = r.length * 100;
+        const ratio = l_cm / d_cm;
+
+        let html = '';
+
+        // Performance summary
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Performance Summary</div>
+                <div class="calc-result">Overall Score: ${r.performanceScore}/100</div>
+                <div style="margin-top: 15px;">
+                    <div class="performance-meter" style="height: 20px;">
+                        <div class="performance-fill" style="width: ${r.performanceScore}%;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Parameter analysis
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Parameter Analysis</div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Diameter (${d_cm.toFixed(2)} cm):</strong>
+                    <div class="performance-meter">
+                        <div class="performance-fill" style="width: ${Math.min(100, (d_cm - 7.33) / (15 - 7.33) * 100)}%;"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        ${d_cm < 8 ? 'Close to cutoff - good mode purity but narrow bandwidth' : 
+                          d_cm > 13 ? 'Large diameter - risk of higher-order modes' :
+                          'Ideal range for 2.4 GHz operation'}
+                    </div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Length (${l_cm.toFixed(2)} cm):</strong>
+                    <div class="performance-meter">
+                        <div class="performance-fill" style="width: ${Math.min(100, (l_cm - 5) / (30 - 5) * 100)}%;"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        ${l_cm < 10 ? 'Short - limited gain' : 
+                          l_cm > 30 ? 'Long - diminishing returns' :
+                          'Ideal length for good gain'}
+                    </div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Length/Diameter Ratio (${ratio.toFixed(2)}):</strong>
+                    <div class="performance-meter">
+                        <div class="performance-fill" style="width: ${Math.min(100, Math.max(0, (ratio - 1) / (6 - 1) * 100))}%;"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        ${ratio < 2 ? 'Low ratio - poor impedance matching' :
+                          ratio > 8 ? 'High ratio - increased losses' :
+                          'Good ratio for balanced performance'}
+                    </div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <strong>Cutoff Margin (${((1 - r.cutoffFreq/F) * 100).toFixed(1)}%):</strong>
+                    <div class="performance-meter">
+                        <div class="performance-fill" style="width: ${(1 - r.cutoffFreq/F) * 100}%;"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">
+                        ${(1 - r.cutoffFreq/F) < 0.15 ? 'Low margin - high waveguide losses' :
+                          (1 - r.cutoffFreq/F) > 0.3 ? 'Good margin - low losses' :
+                          'Adequate margin for operation'}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Construction recommendations
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Construction Recommendations</div>
+                <div style="margin-top: 10px;">
+                    <ul style="padding-left: 20px;">
+                        <li>Use a clean, smooth metal can with no dents or seams in the critical area</li>
+                        <li>Ensure the back wall is flat and perpendicular to the can axis</li>
+                        <li>Use an N-type connector for best performance at 2.4 GHz</li>
+                        <li>The probe should be made of solid copper wire (1.5-2 mm diameter)</li>
+                        <li>Position the probe accurately at ${(r.probePosition * 100).toFixed(2)} cm from the back wall</li>
+                        <li>Cut the probe to exactly ${(r.probeLength * 100).toFixed(2)} cm length</li>
+                        <li>Ensure good electrical contact between the connector and can body</li>
+                        <li>Consider adding a plastic cover or radome to protect the open end</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        // Expected performance
+        html += `
+            <div class="calc-step">
+                <div class="calc-step-title">Expected Performance</div>
+                <div style="margin-top: 10px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>Parameter</strong></td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>Value</strong></td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>Rating</strong></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Gain</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.gain.toFixed(1)} dBi</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.gain > 12 ? 'Excellent' : r.gain > 9 ? 'Good' : r.gain > 6 ? 'Fair' : 'Poor'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">VSWR</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.vswr.toFixed(1)}:1</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.vswr < 1.5 ? 'Excellent' : r.vswr < 2.0 ? 'Good' : r.vswr < 2.5 ? 'Fair' : 'Poor'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Bandwidth</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${Math.round(r.bandwidth)} MHz</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.bandwidth > 100 ? 'Excellent' : r.bandwidth > 80 ? 'Good' : r.bandwidth > 60 ? 'Fair' : 'Poor'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">Beamwidth</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.beamwidth}°</td>
+                            <td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${r.beamwidth < 40 ? 'Very directional' : r.beamwidth < 60 ? 'Directional' : 'Wide'}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        performanceContent.innerHTML = html;
     }
 
     // ========= UI HELPERS =========
@@ -1289,15 +1739,48 @@
         }
     }
 
+    // Set optimal values
+    function setOptimalDiameter() {
+        diameterInput.value = '10';
+        validateInputs();
+    }
+
+    function setOptimalLength() {
+        lengthInput.value = '25';
+        validateInputs();
+    }
+
+    // Tab switching functionality
+    function setupTabs() {
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}Tab`).classList.add('active');
+            });
+        });
+    }
+
     // ========= EVENT BINDINGS =========
     diameterInput.addEventListener('input', validateInputs);
     lengthInput.addEventListener('input', validateInputs);
     calculateBtn.addEventListener('click', calculateDesign);
     resetBtn.addEventListener('click', resetForm);
     darkModeToggle.addEventListener('click', toggleDarkMode);
+    optimalDiameterBtn.addEventListener('click', setOptimalDiameter);
+    optimalLengthBtn.addEventListener('click', setOptimalLength);
 
     // Initial state
     calculateBtn.disabled = true;
+    setupTabs();
 </script>
 </body>
 </html>
